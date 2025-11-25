@@ -1,6 +1,7 @@
 <?php
 // index.php - Punto de entrada
-
+require_once 'autoload.php';
+require_once 'config/db.php';
 // Definir la ruta base para MVC
 define('BASE_PATH', __DIR__);
 
