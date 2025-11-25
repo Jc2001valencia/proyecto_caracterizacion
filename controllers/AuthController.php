@@ -23,26 +23,6 @@ class AuthController
         }
     }
 
-    public function mostrar($page = 'home')
-    {
-        switch($page) {
-            case 'login':
-            case 'register':
-                $viewPath = __DIR__ . '/../views/AuthView.php';
-                break;
-            case 'home':
-            default:
-                $viewPath = __DIR__ . '/../views/home_landing.php';
-                break;
-        }
-        
-        if (file_exists($viewPath)) {
-            include $viewPath;
-        } else {
-            echo "Vista no encontrada: $viewPath";
-        }
-    }
-
     public function register()
     {
         try {
@@ -83,33 +63,14 @@ class AuthController
             // Hashear contraseña
             $data['contrasena'] = password_hash($data['contrasena'], PASSWORD_DEFAULT);
 
-            // Generar token de verificación
-            $token_verificacion = bin2hex(random_bytes(32));
-            $data['token_verificacion'] = $token_verificacion;
-            $data['fecha_expiracion_token'] = date('Y-m-d H:i:s', strtotime('+24 hours'));
-
-            // Crear usuario
+            // Crear usuario (sin verificación de email)
             $result = $this->usuarioModel->create($data);
             
             if($result === true) {
-                // Enviar email de verificación
-                $emailEnviado = $this->emailService->enviarEmailVerificacion(
-                    $data['email'], 
-                    $data['nombre'], 
-                    $token_verificacion
-                );
-
-                if($emailEnviado) {
-                    echo json_encode([
-                        'success' => true, 
-                        'message' => 'Registro exitoso. Se ha enviado un enlace de verificación a su correo electrónico.'
-                    ]);
-                } else {
-                    echo json_encode([
-                        'success' => true, 
-                        'message' => 'Registro exitoso, pero no se pudo enviar el email de verificación. Contacte al administrador.'
-                    ]);
-                }
+                echo json_encode([
+                    'success' => true, 
+                    'message' => 'Registro exitoso. Ya puedes iniciar sesión.'
+                ]);
             } else {
                 $msg = is_array($result) && isset($result['error']) ? $result['error'] : 'No se pudo crear el usuario';
                 echo json_encode(['success'=>false,'message'=>$msg]);
@@ -136,26 +97,6 @@ class AuthController
             $user = $this->usuarioModel->getByEmail($email);
 
             if ($user) {
-                // Verificar si la cuenta está verificada
-                if(!$user['verificado']) {
-                    echo json_encode([
-                        'success' => false, 
-                        'message' => 'Por favor verifique su email antes de iniciar sesión. Revise su bandeja de entrada.'
-                    ]);
-                    return;
-                }
-
-                // Verificar si la cuenta está bloqueada
-                if($user['bloqueado_hasta'] && strtotime($user['bloqueado_hasta']) > time()) {
-                    $tiempo_restante = strtotime($user['bloqueado_hasta']) - time();
-                    $minutos = ceil($tiempo_restante / 60);
-                    echo json_encode([
-                        'success' => false, 
-                        'message' => "Cuenta bloqueada. Intente nuevamente en $minutos minutos."
-                    ]);
-                    return;
-                }
-
                 // Verificar contraseña
                 if (password_verify($pass, $user['contrasena'])) {
                     // Reiniciar intentos fallidos
@@ -176,10 +117,11 @@ class AuthController
                     );
 
                     if ($emailEnviado) {
-                        $_SESSION['organizacion_id_2fa'] = $user['id'];
+                        $_SESSION['user_id_2fa'] = $user['id'];
                         echo json_encode([
                             'success' => true,
-                            'message' => 'Código de verificación enviado a su correo electrónico'
+                            'message' => 'Código de verificación enviado a su correo electrónico',
+                            'requires2fa' => true
                         ]);
                     } else {
                         echo json_encode([
@@ -218,6 +160,7 @@ class AuthController
         }
     }
 
+    // Mantener solo verificar2FA() y reenviar2FA()
     public function verificar2FA()
     {
         try {
@@ -228,13 +171,13 @@ class AuthController
                 return;
             }
 
-            if(!isset($_SESSION['organizacion_id_2fa'])) {
+            if(!isset($_SESSION['user_id_2fa'])) {
                 echo json_encode(['success'=>false,'message'=>'Sesión de verificación no válida']);
                 return;
             }
 
-            $organizacion_id = $_SESSION['organizacion_id_2fa'];
-            $user = $this->usuarioModel->verificarCodigo2FA($organizacion_id, $codigo);
+            $user_id = $_SESSION['user_id_2fa'];
+            $user = $this->usuarioModel->verificarCodigo2FA($user_id, $codigo);
 
             if($user) {
                 // Establecer sesión de usuario
@@ -249,7 +192,7 @@ class AuthController
                 $this->usuarioModel->limpiarCodigo2FA($user['id']);
                 $this->usuarioModel->actualizarUltimoLogin($user['id']);
 
-                unset($_SESSION['organizacion_id_2fa']);
+                unset($_SESSION['user_id_2fa']);
 
                 echo json_encode([
                     'success' => true,
@@ -272,13 +215,13 @@ class AuthController
     public function reenviar2FA()
     {
         try {
-            if(!isset($_SESSION['organizacion_id_2fa'])) {
+            if(!isset($_SESSION['user_id_2fa'])) {
                 echo json_encode(['success'=>false,'message'=>'Sesión no válida']);
                 return;
             }
 
-            $organizacion_id = $_SESSION['organizacion_id_2fa'];
-            $user = $this->usuarioModel->getById($organizacion_id);
+            $user_id = $_SESSION['user_id_2fa'];
+            $user = $this->usuarioModel->getById($user_id);
 
             if(!$user) {
                 echo json_encode(['success'=>false,'message'=>'Usuario no encontrado']);
@@ -317,165 +260,10 @@ class AuthController
         }
     }
 
-    public function verificarEmail()
-    {
-        try {
-            $token = $_GET['token'] ?? '';
-            
-            if(empty($token)) {
-                die("Token no proporcionado");
-            }
-
-            $user = $this->usuarioModel->verificarTokenEmail($token);
-
-            if($user) {
-                // Marcar como verificado
-                $this->usuarioModel->marcarComoVerificado($user['id']);
-                
-                // Mostrar página de éxito
-                $this->mostrarVerificacionExito($user['nombre']);
-            } else {
-                // Mostrar página de error
-                $this->mostrarVerificacionError("Token de verificación no válido o expirado");
-            }
-
-        } catch (Exception $e) {
-            error_log("Error en verificación de email: " . $e->getMessage());
-            $this->mostrarVerificacionError("Error en el servidor");
-        }
-    }
-
-    public function recuperar()
-    {
-        try {
-            $email = $_POST['email_recuperar'] ?? '';
-            
-            if(empty($email)) {
-                echo json_encode(['success'=>false,'message'=>'El email es obligatorio']);
-                return;
-            }
-
-            if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                echo json_encode(['success'=>false,'message'=>'El formato del email no es válido']);
-                return;
-            }
-
-            $user = $this->usuarioModel->getByEmail($email);
-
-            if ($user && $user['verificado']) {
-                // Generar token de recuperación
-                $token_recuperacion = bin2hex(random_bytes(32));
-                $fecha_expiracion = date('Y-m-d H:i:s', strtotime('+1 hour'));
-
-                // Guardar token
-                $this->usuarioModel->guardarTokenRecuperacion($user['id'], $token_recuperacion, $fecha_expiracion);
-
-                // Enviar email de recuperación
-                $emailEnviado = $this->emailService->enviarEmailRecuperacion(
-                    $user['email'], 
-                    $user['nombre'], 
-                    $token_recuperacion
-                );
-
-                if($emailEnviado) {
-                    echo json_encode([
-                        'success' => true, 
-                        'message' => 'Se ha enviado un enlace de recuperación a su correo electrónico'
-                    ]);
-                } else {
-                    echo json_encode([
-                        'success' => false, 
-                        'message' => 'Error al enviar el email de recuperación'
-                    ]);
-                }
-            } else {
-                // Por seguridad, no revelar si el email existe o no
-                echo json_encode([
-                    'success' => true, 
-                    'message' => 'Si el email existe y está verificado, recibirá un enlace de recuperación'
-                ]);
-            }
-
-        } catch (Exception $e) {
-            error_log("Error en recuperación: " . $e->getMessage());
-            echo json_encode(['success'=>false,'message'=>'Error en el servidor. Intente nuevamente.']);
-        }
-    }
-
-    private function mostrarVerificacionExito($nombre)
-    {
-        ?>
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Verificado - Sistema de Gestión</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-
-<body class="bg-gradient-to-br from-green-400 to-blue-600 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="fas fa-check-circle text-green-600 text-4xl"></i>
-        </div>
-        <h1 class="text-2xl font-bold text-gray-900 mb-4">¡Email Verificado!</h1>
-        <p class="text-gray-600 mb-6">
-            Tu cuenta ha sido verificada exitosamente. Ahora puedes iniciar sesión en el sistema.
-        </p>
-        <p class="text-green-600 font-semibold mb-6">
-            Bienvenido/a, <?php echo htmlspecialchars($nombre); ?>!
-        </p>
-        <a href="../index.php?page=login"
-            class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
-            <i class="fas fa-sign-in-alt mr-2"></i>
-            Iniciar Sesión
-        </a>
-    </div>
-</body>
-
-</html>
-<?php
-        exit;
-    }
-
-    private function mostrarVerificacionError($mensaje)
-    {
-        ?>
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error de Verificación - Sistema de Gestión</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-
-<body class="bg-gradient-to-br from-red-400 to-orange-600 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-        <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="fas fa-exclamation-triangle text-red-600 text-4xl"></i>
-        </div>
-        <h1 class="text-2xl font-bold text-gray-900 mb-4">Error en Verificación</h1>
-        <p class="text-gray-600 mb-6">
-            <?php echo htmlspecialchars($mensaje); ?>
-        </p>
-        <a href="../index.php"
-            class="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-semibold">
-            <i class="fas fa-arrow-left mr-2"></i>
-            Volver al Inicio
-        </a>
-    </div>
-</body>
-
-</html>
-<?php
-        exit;
-    }
+    // Eliminar los métodos de verificación de email que ya no necesitamos
+    // public function verificarEmail() { ... }
+    // private function mostrarVerificacionExito() { ... }
+    // private function mostrarVerificacionError() { ... }
 }
 
 new AuthController();
