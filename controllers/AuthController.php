@@ -146,7 +146,7 @@ class AuthController {
             $codigo2FA = $this->twoFactorModel->generarCodigo2FA($usuario['id']);
             
             if ($codigo2FA) {
-              $emailEnviado = $this->emailService->enviarCodigo2FADev($usuario['email'], $usuario['nombre'], $codigo2FA);
+                $emailEnviado = $this->emailService->enviarCodigo2FA($usuario['email'], $usuario['nombre'], $codigo2FA);
                 
                 if ($emailEnviado) {
                     $_SESSION['usuario_temp'] = $usuario;
@@ -171,49 +171,50 @@ class AuthController {
     }
 
     // Verificar código 2FA - Solo para login
-public function verificar2FA() {
-    if (!$this->validarCSRF()) {
-        header('Location: index.php?page=2fa');
-        exit;
+    public function verificar2FA() {
+        if (!$this->validarCSRF()) {
+            header('Location: index.php?page=2fa');
+            exit;
+        }
+
+        if (!isset($_SESSION['usuario_temp'])) {
+            $_SESSION['error'] = "Sesión expirada. Por favor, inicia sesión nuevamente.";
+            header('Location: index.php?page=login');
+            exit;
+        }
+
+        if (empty($_POST['codigo'])) {
+            $_SESSION['error'] = "Por favor, ingresa el código de verificación";
+            header('Location: index.php?page=2fa');
+            exit;
+        }
+
+        $usuario = $_SESSION['usuario_temp'];
+        $codigo = trim($_POST['codigo']);
+
+        // Validar formato del código (6 dígitos)
+        if (!preg_match('/^\d{6}$/', $codigo)) {
+            $_SESSION['error'] = "El código debe contener exactamente 6 dígitos";
+            header('Location: index.php?page=2fa');
+            exit;
+        }
+
+        if ($this->twoFactorModel->verificarCodigo($usuario['id'], $codigo)) {
+            // Autenticación exitosa
+            $_SESSION['usuario'] = $usuario;
+            unset($_SESSION['usuario_temp']);
+            $_SESSION['success'] = "¡Bienvenido, " . $usuario['nombre'] . "!";
+            
+            // Incluir directamente la vista del Home
+            require_once 'views/Home.php';
+            exit;
+        } else {
+            $_SESSION['error'] = "Código de verificación incorrecto o expirado";
+            header('Location: index.php?page=2fa');
+            exit;
+        }
     }
 
-    if (!isset($_SESSION['usuario_temp'])) {
-        $_SESSION['error'] = "Sesión expirada. Por favor, inicia sesión nuevamente.";
-        header('Location: index.php?page=login');
-        exit;
-    }
-
-    if (empty($_POST['codigo'])) {
-        $_SESSION['error'] = "Por favor, ingresa el código de verificación";
-        header('Location: index.php?page=2fa');
-        exit;
-    }
-
-    $usuario = $_SESSION['usuario_temp'];
-    $codigo = trim($_POST['codigo']);
-
-    // Validar formato del código (6 dígitos)
-    if (!preg_match('/^\d{6}$/', $codigo)) {
-        $_SESSION['error'] = "El código debe contener exactamente 6 dígitos";
-        header('Location: index.php?page=2fa');
-        exit;
-    }
-
-    if ($this->twoFactorModel->verificarCodigo($usuario['id'], $codigo)) {
-        // Autenticación exitosa
-        $_SESSION['usuario'] = $usuario;
-        unset($_SESSION['usuario_temp']);
-        $_SESSION['success'] = "¡Bienvenido, " . $usuario['nombre'] . "!";
-        
-        // ✅ ACTUALIZADO: Incluir directamente la vista del Home
-        require_once 'views/Home.php';
-        exit;
-    } else {
-        $_SESSION['error'] = "Código de verificación incorrecto o expirado";
-        header('Location: index.php?page=2fa');
-        exit;
-    }
-}
     // Reenviar código 2FA
     public function reenviarCodigo2FA() {
         if (!isset($_SESSION['usuario_temp'])) {
@@ -243,7 +244,22 @@ public function verificar2FA() {
 
     // Cerrar sesión
     public function logout() {
+        // Destruir todas las variables de sesión
+        $_SESSION = array();
+        
+        // Si se desea destruir la sesión completamente, borra también la cookie de sesión.
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
+        
+        // Finalmente, destruir la sesión.
         session_destroy();
+        
+        // Redirigir al login
         header('Location: index.php');
         exit;
     }
