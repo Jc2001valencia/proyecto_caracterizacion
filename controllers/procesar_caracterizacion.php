@@ -1,10 +1,15 @@
 <?php
 session_start();
-require_once "../config/db.php"; // Asegúrate de que apunta a la clase Database
+require_once "../config/db.php";
 
-// Crear la conexión
-$db = new Database();
-$conn = $db->connect(); // $conn ahora es un objeto PDO válido // Asegúrate de tener este archivo con la conexión PDO
+// Crear la conexión CORREGIDA
+$database = new Database();
+$conn = $database->getConnection(); // ✅ Método correcto
+
+// Verificar conexión
+if (!$conn) {
+    die("Error: No se pudo establecer conexión con la base de datos");
+}
 
 class AnalizadorProyecto {
     private $datos;
@@ -133,25 +138,15 @@ class AnalizadorProyecto {
         $equipo = [];
         if (isset($this->datos['equipo_json'])) {
             $equipo = json_decode($this->datos['equipo_json'], true);
-        } elseif (isset($this->datos['nombre']) && isset($this->datos['rol'])) {
-            foreach ($this->datos['nombre'] as $i => $nombre) {
-                $equipo[] = [
-                    'nombre' => $nombre,
-                    'rol' => $this->datos['rol'][$i] ?? '',
-                    'responsabilidad' => $this->datos['responsabilidad'][$i] ?? ''
-                ];
-            }
         }
 
         return [
             'proyecto' => [
                 'nombre' => $this->datos['nombre_proyecto'] ?? 'Sin nombre',
-                'entidad' => $this->datos['entidad'] ?? 'No especificada',
-                'sector' => $this->datos['sector'] ?? 'No definido',
-                'tamano' => $this->datos['tamano'] ?? 'No definido',
-                'pais' => $this->datos['pais'] ?? 'No indicado',
-                'dominio_problema' => $this->datos['dominio_problema'] ?? 'Sin dominio',
                 'descripcion' => $this->datos['descripcion_proyecto'] ?? 'Sin descripción',
+                'dominio_problema' => $this->datos['dominio_problema'] ?? 'Sin dominio',
+                'tamano_estimado' => $this->datos['tamano_estimado'] ?? 0,
+                'pais' => $this->datos['pais'] ?? 'No indicado',
                 'equipo' => $equipo
             ],
             'triple_restriccion' => [
@@ -170,44 +165,112 @@ class AnalizadorProyecto {
 }
 
 // ===============================
-// PROCESAR Y GUARDAR
+// PROCESAR Y GUARDAR - ACTUALIZADO
 // ===============================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $analizador = new AnalizadorProyecto($_POST);
     $reporte = $analizador->generarReporte();
 
-    // Guardar en la base de datos
+    // Guardar en la base de datos - CONSULTAS ACTUALIZADAS
     try {
-$sql = "INSERT INTO proyectos
-    (nombre, pais_cliente, tamano_estimado, dominio_problema, descripcion, equipo, factores, complejidad_total, fecha_creacion)
-    VALUES
-    (:nombre, :pais_cliente, :tamano_estimado, :dominio_problema, :descripcion, :equipo, :factores, :complejidad_total, NOW())";
+        // 1. Obtener IDs de las relaciones
+        $dominio_id = null;
+        $pais_id = null;
+        
+        // Obtener dominio_id
+        if (!empty($reporte['proyecto']['dominio_problema'])) {
+            $stmt_dominio = $conn->prepare("SELECT id FROM dominios WHERE nombre = ?");
+            $stmt_dominio->execute([$reporte['proyecto']['dominio_problema']]);
+            $dominio_data = $stmt_dominio->fetch(PDO::FETCH_ASSOC);
+            $dominio_id = $dominio_data ? $dominio_data['id'] : null;
+        }
 
-$stmt = $conn->prepare($sql);
-$stmt->execute([
-    ':nombre' => $reporte['proyecto']['nombre'],
-    ':pais_cliente' => $reporte['proyecto']['pais'],
-    ':tamano_estimado' => $reporte['proyecto']['tamano'],
-    ':dominio_problema' => $reporte['proyecto']['dominio_problema'],
-    ':descripcion' => $reporte['proyecto']['descripcion'],
-    ':equipo' => json_encode($reporte['proyecto']['equipo']),
-    ':factores' => json_encode([
-        'restricciones' => $reporte['triple_restriccion']['factores'] ?? [],
-        'complejidad' => $reporte['complejidad']['factores'] ?? [],
-        'dominio_cynefin' => $reporte['dominio_cynefin'],
-        'estrategias' => $reporte['estrategias']
-    ]),
-    ':complejidad_total' => $reporte['complejidad']['total']
-]);
+        // Obtener/crear pais_id
+        if (!empty($reporte['proyecto']['pais'])) {
+            $stmt_pais = $conn->prepare("SELECT id FROM paises WHERE nombre = ?");
+            $stmt_pais->execute([$reporte['proyecto']['pais']]);
+            $pais_data = $stmt_pais->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$pais_data) {
+                $stmt_insert_pais = $conn->prepare("INSERT INTO paises (nombre) VALUES (?)");
+                $stmt_insert_pais->execute([$reporte['proyecto']['pais']]);
+                $pais_id = $conn->lastInsertId();
+            } else {
+                $pais_id = $pais_data['id'];
+            }
+        }
+
+        // 2. Insertar proyecto principal
+        $sql_proyecto = "INSERT INTO proyectos 
+                        (nombre, descripcion, horas, pais_id, dominio_id, organizacion_id) 
+                        VALUES 
+                        (:nombre, :descripcion, :horas, :pais_id, :dominio_id, :organizacion_id)";
+
+        $stmt_proyecto = $conn->prepare($sql_proyecto);
+        $stmt_proyecto->execute([
+            ':nombre' => $reporte['proyecto']['nombre'],
+            ':descripcion' => $reporte['proyecto']['descripcion'],
+            ':horas' => $reporte['proyecto']['tamano_estimado'],
+            ':pais_id' => $pais_id,
+            ':dominio_id' => $dominio_id,
+            ':organizacion_id' => $_SESSION['organizacion_id'] ?? 1 // Ajusta según tu lógica de sesión
+        ]);
+        
+        $proyecto_id = $conn->lastInsertId();
+
+        // 3. Insertar perfiles del equipo
+        if (!empty($reporte['proyecto']['equipo'])) {
+            foreach ($reporte['proyecto']['equipo'] as $miembro) {
+                if (!empty($miembro['perfil'])) {
+                    $stmt_perfil = $conn->prepare("SELECT id FROM perfiles WHERE nombre = ?");
+                    $stmt_perfil->execute([$miembro['perfil']]);
+                    $perfil_data = $stmt_perfil->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($perfil_data) {
+                        $stmt_equipo = $conn->prepare("
+                            INSERT INTO proyectos_perfiles (proyecto_id, perfil_id, cantidad) 
+                            VALUES (?, ?, ?)
+                        ");
+                        $stmt_equipo->execute([
+                            $proyecto_id, 
+                            $perfil_data['id'], 
+                            $miembro['cantidad'] ?? 1
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // 4. Insertar características de complejidad
+        if (!empty($reporte['complejidad']['factores'])) {
+            foreach ($reporte['complejidad']['factores'] as $caracteristica_nombre) {
+                $stmt_caracteristica = $conn->prepare("SELECT id FROM caracteristicas WHERE nombre = ?");
+                $stmt_caracteristica->execute([$caracteristica_nombre]);
+                $caracteristica_data = $stmt_caracteristica->fetch(PDO::FETCH_ASSOC);
+                
+                if ($caracteristica_data) {
+                    $stmt_proy_caract = $conn->prepare("
+                        INSERT INTO proyectos_caracteristicas (proyecto_id, caracteristica_id) 
+                        VALUES (?, ?)
+                    ");
+                    $stmt_proy_caract->execute([$proyecto_id, $caracteristica_data['id']]);
+                }
+            }
+        }
+
+        // 5. Guardar análisis en sesión
+        $_SESSION['reporte_caracterizacion'] = $reporte;
+        $_SESSION['proyecto_id'] = $proyecto_id;
+
+        header('Location: ../views/resultados_caracterizacion.php');
+        exit;
 
     } catch (PDOException $e) {
-        die("Error al guardar en la base de datos: " . $e->getMessage());
+        error_log("Error al guardar proyecto: " . $e->getMessage());
+        $_SESSION['error'] = "Error al guardar el proyecto: " . $e->getMessage();
+        header('Location: ../views/Home.php');
+        exit;
     }
-
-    // Guardar en sesión para mostrar resultados
-    $_SESSION['reporte_caracterizacion'] = $reporte;
-    header('Location:../views/resultados_caracterizacion.php');
-    exit;
 } else {
     header('Location: ../index.php');
     exit;

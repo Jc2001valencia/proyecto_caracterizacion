@@ -1,39 +1,71 @@
 <?php
-require_once(__DIR__ . '/../config/db.php');
+// Manejo de sesiones
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Crear conexión PDO
-$database = new Database();
-$conn = $database->connect();
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['usuario'])) {
+    header('Location: index.php');
+    exit;
+}
 
-// Consultar proyectos
-$query = "SELECT id, nombre AS nombre_proyecto, descripcion AS descripcion_proyecto, 
-                 dominio_problema AS dominio_cynefin, complejidad_total 
-          FROM proyectos 
-          ORDER BY id DESC";
+// Incluir conexión a BD
+require_once($_SERVER['DOCUMENT_ROOT'] . '/proyecto_caracterizacion/config/db.php');
 
-$stmt = $conn->prepare($query);
-$stmt->execute();
-$proyectos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Verificar que la conexión se estableció correctamente
+if (!isset($db) || $db === null) {
+    die("Error: No se pudo establecer conexión con la base de datos");
+}
 
-// Consultar dominios predefinidos
-$queryDominios = "SELECT id, nombre FROM dominios_problema ORDER BY nombre";
-$stmtDominios = $conn->prepare($queryDominios);
-$stmtDominios->execute();
-$dominios = $stmtDominios->fetchAll(PDO::FETCH_ASSOC);
+try {
+    // Usar la conexión directamente
+    $conn = $db;
 
-// Consultar perfiles predefinidos
-$queryPerfiles = "SELECT id, nombre FROM perfiles ORDER BY nombre";
-$stmtPerfiles = $conn->prepare($queryPerfiles);
-$stmtPerfiles->execute();
-$perfiles = $stmtPerfiles->fetchAll(PDO::FETCH_ASSOC);
+    // CONSULTA ACTUALIZADA: Proyectos con JOINs para obtener nombres en lugar de IDs
+    $query = "SELECT 
+                p.id, 
+                p.nombre AS nombre_proyecto, 
+                p.descripcion AS descripcion_proyecto, 
+                d.nombre AS dominio_cynefin,
+                p.horas AS complejidad_total
+              FROM proyectos p
+              LEFT JOIN dominios d ON p.dominio_id = d.id
+              ORDER BY p.id DESC";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->execute();
+    $proyectos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Consultar factores de complejidad
-$queryComplejidades = "SELECT id, nombre, descripcion FROM factores_complejidad ORDER BY nombre";
-$stmtComplejidades = $conn->prepare($queryComplejidades);
-$stmtComplejidades->execute();
-$complejidades = $stmtComplejidades->fetchAll(PDO::FETCH_ASSOC);
+    // CONSULTA ACTUALIZADA: Dominios predefinidos (tabla correcta: dominios)
+    $queryDominios = "SELECT id, nombre FROM dominios ORDER BY nombre";
+    $stmtDominios = $conn->prepare($queryDominios);
+    $stmtDominios->execute();
+    $dominios = $stmtDominios->fetchAll(PDO::FETCH_ASSOC);
+
+    // CONSULTA ACTUALIZADA: Perfiles predefinidos (tabla correcta: perfiles)
+    $queryPerfiles = "SELECT id, nombre FROM perfiles ORDER BY nombre";
+    $stmtPerfiles = $conn->prepare($queryPerfiles);
+    $stmtPerfiles->execute();
+    $perfiles = $stmtPerfiles->fetchAll(PDO::FETCH_ASSOC);
+
+    // CONSULTA ACTUALIZADA: Factores de complejidad (tabla correcta: caracteristicas)
+    $queryComplejidades = "SELECT id, nombre, descripcion FROM caracteristicas ORDER BY nombre";
+    $stmtComplejidades = $conn->prepare($queryComplejidades);
+    $stmtComplejidades->execute();
+    $complejidades = $stmtComplejidades->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    // Manejo de errores de base de datos con más detalles
+    error_log("Error en consultas Home.php: " . $e->getMessage());
+    echo "<div style='background: #fef2f2; color: #dc2626; padding: 15px; margin: 10px; border: 1px solid #fecaca; border-radius: 5px;'>";
+    echo "<h4>Error en la base de datos:</h4>";
+    echo "<p><strong>" . $e->getMessage() . "</strong></p>";
+    echo "<p>Consulta que falló: Revisa las tablas y columnas</p>";
+    echo "</div>";
+    die("Error al cargar los datos. Por favor, intenta más tarde.");
+}
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -453,7 +485,8 @@ $complejidades = $stmtComplejidades->fetchAll(PDO::FETCH_ASSOC);
                                     <p><strong>2. Alcance fijo:</strong> Alcance definido; cambios pueden solicitarse,
                                         pero no alteran contrato principal.</p>
                                     <p><strong>3. Costo fijo:</strong> Precio total fijado. Seleccione tipo de contrato:
-                                        <strong>Llave en mano</strong> o <strong>Time & Material</strong>.</p>
+                                        <strong>Llave en mano</strong> o <strong>Time & Material</strong>.
+                                    </p>
                                 </div>
                             </div>
 
