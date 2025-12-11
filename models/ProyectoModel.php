@@ -5,7 +5,13 @@ class ProyectoModel {
     private $conn;
 
     public function __construct() {
-        $this->conn = Database::getConnection();
+        global $db; // Acceder a la variable global $db
+        
+        if ($db === null) {
+            throw new Exception("No se pudo establecer conexión con la base de datos");
+        }
+        
+        $this->conn = $db; // Asignar la conexión global
     }
 
     public function guardarProyecto($data) {

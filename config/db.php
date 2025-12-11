@@ -11,25 +11,27 @@ class Database {
         $this->conn = null;
         try {
             $this->conn = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=utf8",
+                "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=utf8mb4",
                 $this->username, 
-                $this->password
+                $this->password,
+                array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
             );
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch(PDOException $exception) {
-            echo "Error de conexión: " . $exception->getMessage();
+            error_log("Error de conexión BD: " . $exception->getMessage());
+            // En desarrollo, puedes descomentar esto para ver el error:
+            // die("Error de conexión: " . $exception->getMessage());
             return null;
         }
         return $this->conn;
     }
 }
 
-// Crear instancia y conexión
+// Crear instancia y conexión GLOBAL
 $database = new Database();
 $db = $database->getConnection();
 
-// Verificar conexión
-if (!$db) {
-    die("Error: No se pudo conectar a la base de datos");
+// Verificación silenciosa
+if ($db === null) {
+    error_log("CRITICAL: No se pudo establecer conexión con la BD");
 }
 ?>

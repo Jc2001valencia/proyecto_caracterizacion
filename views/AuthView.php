@@ -1,3 +1,29 @@
+<?php
+// AuthView.php - SOLO estas líneas al inicio:
+
+// No usar session_start() aquí - ya se inició en index.php
+
+// Determinar página con lógica especial
+if (isset($_SESSION['forzar_2fa'])) {
+    $current_page = '2fa';
+    unset($_SESSION['forzar_2fa']); // Limpiar para que no se repita
+} else {
+    $current_page = isset($_GET['page']) ? $_GET['page'] : 'login';
+}
+
+// Si hay usuario_temp pero estamos en login/register, forzar 2fa
+if (isset($_SESSION['usuario_temp']) && ($current_page === 'login' || $current_page === 'register')) {
+    $current_page = '2fa';
+}
+
+// CSRF token
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+$form_data = isset($_SESSION['form_data']) ? $_SESSION['form_data'] : [];
+unset($_SESSION['form_data']);
+?>
 <!doctype html>
 <html lang="es">
 
@@ -23,7 +49,7 @@
             </div>
 
             <!-- Mensajes de éxito/error -->
-            <?php if (isset($error) && $error): ?>
+            <?php if (isset($error) && !empty($error)): ?>
             <div
                 class="mx-4 mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded flex items-center justify-between">
                 <div class="flex items-center">
@@ -36,7 +62,7 @@
             </div>
             <?php endif; ?>
 
-            <?php if (isset($success) && $success): ?>
+            <?php if (isset($success) && !empty($success)): ?>
             <div
                 class="mx-4 mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded flex items-center justify-between">
                 <div class="flex items-center">
@@ -48,6 +74,20 @@
                 </button>
             </div>
             <?php endif; ?>
+
+            <?php
+            // Determinar página actual
+            $current_page = isset($_GET['page']) ? $_GET['page'] : 'login';
+            
+            // Asegurar que csrf_token existe
+            if (!isset($_SESSION['csrf_token'])) {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            }
+            
+            // Recuperar datos del formulario si existen
+            $form_data = isset($_SESSION['form_data']) ? $_SESSION['form_data'] : [];
+            unset($_SESSION['form_data']);
+            ?>
 
             <!-- Sección de Verificación 2FA -->
             <div id="seccion-2fa" class="<?= $current_page === '2fa' ? '' : 'hidden' ?>">
@@ -72,7 +112,7 @@
                                 <input type="text" name="codigo" maxlength="6"
                                     class="w-full p-4 text-center text-2xl font-mono border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                     placeholder="000000" required pattern="[0-9]{6}" autocomplete="one-time-code"
-                                    inputmode="numeric" />
+                                    inputmode="numeric" autofocus />
                                 <i
                                     class="fas fa-key absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-400"></i>
                             </div>
@@ -110,8 +150,9 @@
                 </div>
             </div>
 
-            <!-- Tabs (ocultos durante 2FA) -->
-            <div id="seccion-tabs" class="<?= $current_page === '2fa' ? 'hidden' : 'block' ?>">
+            <!-- Tabs (ocultos durante 2FA y crear-organizacion) -->
+            <div id="seccion-tabs"
+                class="<?= ($current_page === '2fa' || $current_page === 'crear-organizacion') ? 'hidden' : 'block' ?>">
                 <div class="flex bg-gray-100 p-1 m-4 rounded-lg">
                     <button id="tab-login"
                         class="flex-1 py-3 px-4 rounded-md transition-all duration-300 <?= $current_page === 'login' ? 'bg-blue-600 text-white font-medium shadow-lg' : 'font-medium text-gray-600 hover:text-gray-800' ?>">
@@ -119,7 +160,7 @@
                     </button>
                     <button id="tab-register"
                         class="flex-1 py-3 px-4 rounded-md transition-all duration-300 <?= $current_page === 'register' ? 'bg-blue-600 text-white font-medium shadow-lg' : 'font-medium text-gray-600 hover:text-gray-800' ?>">
-                        <i class="fas fa-building mr-2"></i>Registrar Organización
+                        <i class="fas fa-user-plus mr-2"></i>Registrarse
                     </button>
                 </div>
 
@@ -173,103 +214,209 @@
                         </button>
                     </form>
 
-                    <!-- Registro Form -->
+                    <!-- Registro Form (PASO 1 - SOLO USUARIO) -->
                     <form id="form-register" method="POST" action="index.php"
                         class="space-y-5 <?= $current_page === 'register' ? '' : 'hidden' ?>">
                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                         <input type="hidden" name="action" value="register">
+                        <!-- NO incluir paso=1 aquí, se agrega en JS -->
 
-                        <?php
-                        // Recuperar datos del formulario si existen
-                        $form_data = isset($_SESSION['form_data']) ? $_SESSION['form_data'] : [];
-                        unset($_SESSION['form_data']); // Limpiar después de usar
-                        ?>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                                <i class="fas fa-user-circle mr-2 text-blue-600"></i>
+                                Datos Personales
+                            </h3>
 
-                        <div class="relative">
-                            <input type="text" name="nombre" id="register-nombre"
-                                class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                placeholder="Nombre de la Organización" required
-                                value="<?= isset($form_data['nombre']) ? htmlspecialchars($form_data['nombre']) : (isset($_POST['nombre']) ? htmlspecialchars($_POST['nombre']) : '') ?>" />
-                            <i
-                                class="fas fa-building absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="relative">
+                                    <input type="text" name="nombre" id="register-nombre"
+                                        class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                        placeholder="Nombre" required
+                                        value="<?= isset($form_data['nombre']) ? htmlspecialchars($form_data['nombre']) : '' ?>">
+                                    <i
+                                        class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                </div>
 
-                        <div class="relative">
-                            <input type="text" name="descripcion" id="register-descripcion"
-                                class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                placeholder="Descripción de la organización (opcional)"
-                                value="<?= isset($form_data['descripcion']) ? htmlspecialchars($form_data['descripcion']) : (isset($_POST['descripcion']) ? htmlspecialchars($_POST['descripcion']) : '') ?>" />
-                            <i
-                                class="fas fa-info-circle absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        </div>
-
-                        <div class="relative">
-                            <input type="email" name="email" id="register-email"
-                                class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                placeholder="correo@organizacion.com" required
-                                value="<?= isset($form_data['email']) ? htmlspecialchars($form_data['email']) : (isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '') ?>" />
-                            <i
-                                class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        </div>
-
-                        <div class="relative">
-                            <input type="text" name="usuario" id="register-usuario"
-                                class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                placeholder="Nombre de usuario" required
-                                value="<?= isset($form_data['usuario']) ? htmlspecialchars($form_data['usuario']) : (isset($_POST['usuario']) ? htmlspecialchars($_POST['usuario']) : '') ?>" />
-                            <i
-                                class="fas fa-user-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        </div>
-
-                        <div class="relative">
-                            <input type="password" name="contrasena" id="register-password"
-                                class="w-full p-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                placeholder="Crear contraseña" required oninput="checkPasswordStrength(this.value)" />
-                            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <button type="button"
-                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition duration-200"
-                                onclick="togglePassword('register-password')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-
-                        <div class="relative">
-                            <input type="password" name="confirmar_contrasena" id="confirm-password"
-                                class="w-full p-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                placeholder="Confirmar contraseña" required />
-                            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <button type="button"
-                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition duration-200"
-                                onclick="togglePassword('confirm-password')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-
-                        <!-- Indicador de fortaleza de contraseña -->
-                        <div id="password-strength" class="h-2 bg-gray-200 rounded-full hidden">
-                            <div id="password-strength-bar" class="h-full rounded-full transition-all duration-300">
+                                <div class="relative">
+                                    <input type="text" name="apellido" id="register-apellido"
+                                        class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                        placeholder="Apellido" required
+                                        value="<?= isset($form_data['apellido']) ? htmlspecialchars($form_data['apellido']) : '' ?>">
+                                    <i
+                                        class="fas fa-user-tie absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                </div>
                             </div>
-                        </div>
-                        <div id="password-feedback" class="text-xs text-gray-500 mt-1"></div>
 
-                        <div class="flex items-center">
-                            <input type="checkbox" name="terms" id="register-terms" required
-                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition duration-200">
-                            <span class="ml-2 text-sm text-gray-600">
-                                Acepto los <a href="#"
-                                    class="text-blue-600 hover:underline transition duration-200">términos y
-                                    condiciones</a>
-                            </span>
+                            <div class="relative mb-4">
+                                <input type="email" name="email" id="register-email"
+                                    class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    placeholder="tu@email.com" required
+                                    value="<?= isset($form_data['email']) ? htmlspecialchars($form_data['email']) : '' ?>">
+                                <i
+                                    class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+
+                            <div class="relative mb-4">
+                                <input type="text" name="telefono" id="register-telefono"
+                                    class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    placeholder="Teléfono (opcional)"
+                                    value="<?= isset($form_data['telefono']) ? htmlspecialchars($form_data['telefono']) : '' ?>">
+                                <i
+                                    class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+
+                            <div class="relative mb-4">
+                                <input type="text" name="usuario" id="register-usuario"
+                                    class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    placeholder="Nombre de usuario" required
+                                    value="<?= isset($form_data['usuario']) ? htmlspecialchars($form_data['usuario']) : '' ?>">
+                                <i
+                                    class="fas fa-user-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+
+                            <div class="relative mb-4">
+                                <input type="password" name="contrasena" id="register-password"
+                                    class="w-full p-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    placeholder="Crear contraseña" required oninput="checkPasswordStrength(this.value)">
+                                <i
+                                    class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <button type="button"
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition duration-200"
+                                    onclick="togglePassword('register-password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+
+                            <div class="relative">
+                                <input type="password" name="confirmar_contrasena" id="confirm-password"
+                                    class="w-full p-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    placeholder="Confirmar contraseña" required>
+                                <i
+                                    class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <button type="button"
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition duration-200"
+                                    onclick="togglePassword('confirm-password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+
+                            <!-- Indicador de fortaleza de contraseña -->
+                            <div id="password-strength" class="h-2 bg-gray-200 rounded-full hidden mt-3">
+                                <div id="password-strength-bar" class="h-full rounded-full transition-all duration-300">
+                                </div>
+                            </div>
+                            <div id="password-feedback" class="text-xs text-gray-500 mt-1"></div>
+
+                            <div class="flex items-center mt-4">
+                                <input type="checkbox" name="terms" id="register-terms" required
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition duration-200">
+                                <span class="ml-2 text-sm text-gray-600">
+                                    Acepto los <a href="#"
+                                        class="text-blue-600 hover:underline transition duration-200">términos y
+                                        condiciones</a>
+                                </span>
+                            </div>
                         </div>
 
                         <button type="submit" id="btn-register"
                             class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <i class="fas fa-building mr-2"></i>
-                            <span id="register-text">Registrar Organización</span>
+                            <i class="fas fa-user-plus mr-2"></i>
+                            <span id="register-text">Crear Usuario</span>
                             <div id="register-spinner" class="hidden ml-2">
                                 <i class="fas fa-spinner fa-spin"></i>
                             </div>
                         </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sección Crear Organización (PASO 2) -->
+            <div id="seccion-crear-organizacion" class="<?= $current_page === 'crear-organizacion' ? '' : 'hidden' ?>">
+                <div class="mx-4 mt-4 p-6">
+                    <div class="text-center mb-6">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-building text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800">Crear Tu Organización</h3>
+                        <p class="text-gray-600 mt-2 text-sm">
+                            ¡Usuario registrado exitosamente!<br>
+                            Ahora crea tu organización para empezar a usar el sistema.
+                        </p>
+                    </div>
+
+                    <form id="form-crear-organizacion" method="POST" action="index.php" class="space-y-4">
+                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                        <input type="hidden" name="action" value="register">
+                        <input type="hidden" name="paso" value="2">
+
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="text-sm font-semibold text-blue-700 mb-3 flex items-center">
+                                <i class="fas fa-building mr-2 text-blue-600"></i>
+                                Datos de la Organización
+                            </h3>
+
+                            <div class="relative mb-4">
+                                <input type="text" name="nombre_organizacion" id="nombre-organizacion"
+                                    class="w-full p-3 pl-10 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    placeholder="Nombre de la organización *" required
+                                    value="<?= isset($form_data['nombre_organizacion']) ? htmlspecialchars($form_data['nombre_organizacion']) : '' ?>">
+                                <i
+                                    class="fas fa-building absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400"></i>
+                            </div>
+
+                            <div class="relative mb-4">
+                                <textarea name="descripcion_organizacion" id="descripcion-organizacion"
+                                    class="w-full p-3 pl-10 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    placeholder="Descripción de la organización (opcional)"
+                                    rows="2"><?= isset($form_data['descripcion_organizacion']) ? htmlspecialchars($form_data['descripcion_organizacion']) : '' ?></textarea>
+                                <i class="fas fa-info-circle absolute left-3 top-3 text-blue-400"></i>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="relative">
+                                    <input type="text" name="telefono_organizacion" id="telefono-organizacion"
+                                        class="w-full p-3 pl-10 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                        placeholder="Teléfono (opcional)"
+                                        value="<?= isset($form_data['telefono_organizacion']) ? htmlspecialchars($form_data['telefono_organizacion']) : '' ?>">
+                                    <i
+                                        class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400"></i>
+                                </div>
+
+                                <div class="relative">
+                                    <input type="email" name="email_organizacion" id="email-organizacion"
+                                        class="w-full p-3 pl-10 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                        placeholder="Email organización (opcional)"
+                                        value="<?= isset($form_data['email_organizacion']) ? htmlspecialchars($form_data['email_organizacion']) : '' ?>">
+                                    <i
+                                        class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400"></i>
+                                </div>
+                            </div>
+
+                            <div class="relative">
+                                <input type="text" name="direccion_organizacion" id="direccion-organizacion"
+                                    class="w-full p-3 pl-10 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    placeholder="Dirección (opcional)"
+                                    value="<?= isset($form_data['direccion_organizacion']) ? htmlspecialchars($form_data['direccion_organizacion']) : '' ?>">
+                                <i
+                                    class="fas fa-map-marker-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button type="submit" id="btn-crear-organizacion"
+                                class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <i class="fas fa-check mr-2"></i>
+                                <span id="crear-organizacion-text">Crear Organización</span>
+                                <div id="crear-organizacion-spinner" class="hidden ml-2">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                            </button>
+                            <a href="index.php?page=login"
+                                class="px-4 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-semibold transition duration-300 flex items-center justify-center transform hover:scale-105">
+                                <i class="fas fa-sign-in-alt mr-2"></i>
+                                Iniciar Sesión
+                            </a>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -308,7 +455,7 @@
                 <div class="relative">
                     <input type="email" name="email" id="email-recuperar"
                         class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="correo@organizacion.com" required />
+                        placeholder="correo@email.com" required />
                     <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 </div>
                 <div class="flex justify-end gap-3 pt-2">
@@ -343,9 +490,11 @@
     const formLogin = document.getElementById('form-login');
     const formRegister = document.getElementById('form-register');
     const form2FA = document.getElementById('form-2fa');
+    const formCrearOrganizacion = document.getElementById('form-crear-organizacion');
     const seccion2FA = document.getElementById('seccion-2fa');
     const seccionTabs = document.getElementById('seccion-tabs');
     const seccionForms = document.getElementById('seccion-forms');
+    const seccionCrearOrganizacion = document.getElementById('seccion-crear-organizacion');
     const modalRecuperar = document.getElementById('modal-recuperar');
     const btnOlvido = document.getElementById('btn-olvido');
     const btnVolverLogin = document.getElementById('btn-volver-login');
@@ -457,6 +606,26 @@
         }, 5000);
     }
 
+    function validarFormularioRegistro() {
+        // Validar contraseñas
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        if (password !== confirmPassword) {
+            showMessage('Las contraseñas no coinciden', 'error');
+            return false;
+        }
+
+        // Validar términos
+        const terms = document.getElementById('register-terms');
+        if (!terms.checked) {
+            showMessage('Debes aceptar los términos y condiciones', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
     // ==========================
     // EVENT LISTENERS
     // ==========================
@@ -516,22 +685,23 @@
             });
         }
 
-        // Form Register
+        // Form Registro (Paso 1)
         if (formRegister) {
             formRegister.addEventListener('submit', function(e) {
-                // Validar contraseñas
-                const password = document.getElementById('register-password').value;
-                const confirmPassword = document.getElementById('confirm-password').value;
-
-                if (password !== confirmPassword) {
+                if (!validarFormularioRegistro()) {
                     e.preventDefault();
-                    showMessage('Las contraseñas no coinciden', 'error');
-                    hideLoading('btn-register', 'register-spinner', 'register-text',
-                        'Registrar Organización');
+                    hideLoading('btn-register', 'register-spinner', 'register-text', 'Crear Usuario');
                     return;
                 }
-
                 showLoading('btn-register', 'register-spinner', 'register-text');
+            });
+        }
+
+        // Form Crear Organización (Paso 2)
+        if (formCrearOrganizacion) {
+            formCrearOrganizacion.addEventListener('submit', function(e) {
+                showLoading('btn-crear-organizacion', 'crear-organizacion-spinner',
+                    'crear-organizacion-text');
             });
         }
 
@@ -542,22 +712,36 @@
             });
         }
 
-        // Auto-focus en el primer campo
-        const firstInput = document.querySelector('input[required]');
-        if (firstInput) firstInput.focus();
-
-        // Mostrar sección 2FA si es necesario
+        // Auto-focus según la página
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('page') === '2fa') {
+        const page = urlParams.get('page');
+
+        if (page === 'crear-organizacion') {
+            const input = document.getElementById('nombre-organizacion');
+            if (input) input.focus();
+        } else if (page === 'register') {
+            const input = document.querySelector('#form-register input[required]');
+            if (input) input.focus();
+        } else if (page === 'login') {
+            const input = document.querySelector('#form-login input[required]');
+            if (input) input.focus();
+        } else if (page === '2fa') {
+            const input = document.querySelector('#form-2fa input[name="codigo"]');
+            if (input) {
+                input.focus();
+                input.select();
+            }
+        }
+
+        // Mostrar sección correspondiente
+        if (page === '2fa') {
             if (seccion2FA) seccion2FA.classList.remove('hidden');
             if (seccionTabs) seccionTabs.classList.add('hidden');
-
-            const codigoInput = document.querySelector('#form-2fa input[name="codigo"]');
-            if (codigoInput) {
-                codigoInput.focus();
-                // Auto-seleccionar el texto para fácil reemplazo
-                codigoInput.select();
-            }
+            if (seccionCrearOrganizacion) seccionCrearOrganizacion.classList.add('hidden');
+        } else if (page === 'crear-organizacion') {
+            if (seccion2FA) seccion2FA.classList.add('hidden');
+            if (seccionTabs) seccionTabs.classList.add('hidden');
+            if (seccionCrearOrganizacion) seccionCrearOrganizacion.classList.remove('hidden');
         }
 
         console.log('Sistema CARACTERIZACION - Vista de autenticación cargada');
