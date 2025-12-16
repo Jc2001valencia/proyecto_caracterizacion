@@ -321,7 +321,6 @@ public function login() {
     $input = trim($_POST['usuario']);
     $password = $_POST['password'];
     
-    // Buscar usuario en BD incluyendo rol_id
     try {
         $query = "SELECT id, nombre, apellido, email, usuario, contrasena, rol_id 
                  FROM usuarios 
@@ -336,9 +335,8 @@ public function login() {
         if ($stmt->rowCount() > 0) {
             $usuario_db = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Verificar contraseña
             if (password_verify($password, $usuario_db['contrasena'])) {
-                // Preparar datos de usuario con rol_id
+                // 🔴 CORRECCIÓN: Guardar en sesión correctamente
                 $usuario = [
                     'id' => $usuario_db['id'],
                     'nombre' => $usuario_db['nombre'],
@@ -348,15 +346,19 @@ public function login() {
                     'rol_id' => $usuario_db['rol_id'] ?? 1
                 ];
                 
-                // Generar código
-                $codigo2FA = rand(100000, 999999);
+                // 🔴 CORRECCIÓN 1: Guardar usuario_id separadamente
+                $_SESSION['usuario_id'] = $usuario_db['id'];
                 
-                // Guardar en sesión
+                // 🔴 CORRECCIÓN 2: Guardar usuario completo en temporal
                 $_SESSION['usuario_temp'] = $usuario;
-             // En el login(), cuando guardes el código en sesión:
-$_SESSION['codigo_generado'] = $codigo2FA;
                 
-                // Enviar email
+                // 🔴 CORRECCIÓN 3: También guardar en usuario (para compatibilidad)
+                $_SESSION['usuario'] = $usuario;
+                
+                $codigo2FA = rand(100000, 999999);
+                $_SESSION['codigo_generado'] = $codigo2FA;
+                
+                // Enviar email...
                 if (!empty($usuario['email'])) {
                     try {
                         $this->emailService->enviarCodigo2FA(
@@ -475,19 +477,19 @@ public function verificar2FA() {
         unset($_SESSION['usuario_temp']);
         unset($_SESSION['codigo_generado']);
         
-        // 8. REDIRECCIÓN SEGÚN ROL
-        switch ($rol_id) {
-            case 2: // Líder de Proyecto
-                $_SESSION['success'] = "¡Bienvenido Líder $nombre_usuario!";
-                $url_destino = 'index.php?page=lider_home';
-                break;
-                
-            case 1: // AdminOrg (por defecto)
-            default:
-                $_SESSION['success'] = "¡Bienvenido Administrador $nombre_usuario!";
-                $url_destino = 'index.php?action=home';
-                break;
-        }
+       // 8. REDIRECCIÓN SEGÚN ROL
+switch ($rol_id) {
+    case 2: // Líder de Proyecto
+        $_SESSION['success'] = "¡Bienvenido Líder $nombre_usuario!";
+        header('Location: index.php?action=lider_home');
+        exit;
+        
+    case 1: // AdminOrg (por defecto)
+    default:
+        $_SESSION['success'] = "¡Bienvenido Administrador $nombre_usuario!";
+        header('Location: index.php?action=home');
+        exit;
+}
         
         // 9. REDIRIGIR (con múltiples métodos)
         

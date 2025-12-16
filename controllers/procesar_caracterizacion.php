@@ -1,10 +1,29 @@
 <?php
-session_start();
-require_once "../config/db.php"; // Asegúrate de que apunta a la clase Database
+// controllers/procesar_caracterizacion.php
+// VERSIÓN CORREGIDA
 
-// Crear la conexión
-$db = new Database();
-$conn = $db->connect(); // $conn ahora es un objeto PDO válido // Asegúrate de tener este archivo con la conexión PDO
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Verificar sesión
+if (!isset($_SESSION['usuario']) || ($_SESSION['usuario']['rol_id'] ?? 0) != 2) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Acceso no autorizado']);
+    exit;
+}
+
+// CORREGIDO: Usar la misma clase Database que en lider_home.php
+require_once __DIR__ . "/../config/db.php";
+$database = new Database();
+$conn = $database->getConnection();
+
+// Verificar conexión
+if (!($conn instanceof PDO)) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Error de conexión a la base de datos']);
+    exit;
+}
 
 class AnalizadorProyecto {
     private $datos;
@@ -13,7 +32,6 @@ class AnalizadorProyecto {
         $this->datos = $postData;
     }
 
-    // Determinar tipo de triple restricción
     public function determinarTripleRestriccion() {
         $restricciones = isset($this->datos['restricciones']) ? $this->datos['restricciones'] : [];
         $count = count($restricciones);
@@ -27,15 +45,13 @@ class AnalizadorProyecto {
         } elseif ($count === 3) {
             return 5;
         }
-        return 0; // Sin restricciones fijas
+        return 0;
     }
 
-    // Contar factores de complejidad
     public function contarComplejidad() {
         return isset($this->datos['complejidad']) ? count($this->datos['complejidad']) : 0;
     }
 
-    // Determinar dominio Cynefin
     public function determinarDominioCynefin() {
         $tipoRestriccion = $this->determinarTripleRestriccion();
         $totalComplejidad = $this->contarComplejidad();
@@ -61,7 +77,6 @@ class AnalizadorProyecto {
         return 'No determinado';
     }
 
-    // Estrategias según dominio
     public function generarEstrategias($dominio) {
         $estrategias = [
             'Claro' => [
@@ -130,30 +145,7 @@ class AnalizadorProyecto {
         $dominio = $this->determinarDominioCynefin();
         $estrategias = $this->generarEstrategias($dominio);
 
-        $equipo = [];
-        if (isset($this->datos['equipo_json'])) {
-            $equipo = json_decode($this->datos['equipo_json'], true);
-        } elseif (isset($this->datos['nombre']) && isset($this->datos['rol'])) {
-            foreach ($this->datos['nombre'] as $i => $nombre) {
-                $equipo[] = [
-                    'nombre' => $nombre,
-                    'rol' => $this->datos['rol'][$i] ?? '',
-                    'responsabilidad' => $this->datos['responsabilidad'][$i] ?? ''
-                ];
-            }
-        }
-
         return [
-            'proyecto' => [
-                'nombre' => $this->datos['nombre_proyecto'] ?? 'Sin nombre',
-                'entidad' => $this->datos['entidad'] ?? 'No especificada',
-                'sector' => $this->datos['sector'] ?? 'No definido',
-                'tamano' => $this->datos['tamano'] ?? 'No definido',
-                'pais' => $this->datos['pais'] ?? 'No indicado',
-                'dominio_problema' => $this->datos['dominio_problema'] ?? 'Sin dominio',
-                'descripcion' => $this->datos['descripcion_proyecto'] ?? 'Sin descripción',
-                'equipo' => $equipo
-            ],
             'triple_restriccion' => [
                 'tipo' => $tripleRestriccion,
                 'descripcion' => $this->obtenerDescripcionRestriccion($tripleRestriccion),
@@ -169,47 +161,147 @@ class AnalizadorProyecto {
     }
 }
 
-// ===============================
 // PROCESAR Y GUARDAR
-// ===============================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $analizador = new AnalizadorProyecto($_POST);
-    $reporte = $analizador->generarReporte();
-
-    // Guardar en la base de datos
-    try {
-$sql = "INSERT INTO proyectos
-    (nombre, pais_cliente, tamano_estimado, dominio_problema, descripcion, equipo, factores, complejidad_total, fecha_creacion)
-    VALUES
-    (:nombre, :pais_cliente, :tamano_estimado, :dominio_problema, :descripcion, :equipo, :factores, :complejidad_total, NOW())";
-
-$stmt = $conn->prepare($sql);
-$stmt->execute([
-    ':nombre' => $reporte['proyecto']['nombre'],
-    ':pais_cliente' => $reporte['proyecto']['pais'],
-    ':tamano_estimado' => $reporte['proyecto']['tamano'],
-    ':dominio_problema' => $reporte['proyecto']['dominio_problema'],
-    ':descripcion' => $reporte['proyecto']['descripcion'],
-    ':equipo' => json_encode($reporte['proyecto']['equipo']),
-    ':factores' => json_encode([
-        'restricciones' => $reporte['triple_restriccion']['factores'] ?? [],
-        'complejidad' => $reporte['complejidad']['factores'] ?? [],
-        'dominio_cynefin' => $reporte['dominio_cynefin'],
-        'estrategias' => $reporte['estrategias']
-    ]),
-    ':complejidad_total' => $reporte['complejidad']['total']
-]);
-
-    } catch (PDOException $e) {
-        die("Error al guardar en la base de datos: " . $e->getMessage());
+    header('Content-Type: application/json');
+    
+    // Validar datos requeridos
+    if (!isset($_POST['proyecto_id']) || empty($_POST['proyecto_id'])) {
+        echo json_encode(['success' => false, 'message' => 'ID de proyecto requerido']);
+        exit;
     }
-
-    // Guardar en sesión para mostrar resultados
-    $_SESSION['reporte_caracterizacion'] = $reporte;
-    header('Location:../views/resultados_caracterizacion.php');
+    
+    if (!isset($_POST['restricciones']) || empty($_POST['restricciones'])) {
+        echo json_encode(['success' => false, 'message' => 'Debe seleccionar al menos una restricción']);
+        exit;
+    }
+    
+    if (!isset($_POST['complejidad']) || empty($_POST['complejidad'])) {
+        echo json_encode(['success' => false, 'message' => 'Debe seleccionar al menos un factor de complejidad']);
+        exit;
+    }
+    
+    try {
+        $analizador = new AnalizadorProyecto($_POST);
+        $reporte = $analizador->generarReporte();
+        
+        $proyecto_id = (int)$_POST['proyecto_id'];
+        $usuario_id = $_SESSION['usuario']['id'];
+        
+        // Verificar que el proyecto pertenece al usuario
+        $sql_proyecto = "SELECT nombre, descripcion FROM proyectos WHERE id = :id AND lider_proyecto_id = :lider_id";
+        $stmt_proyecto = $conn->prepare($sql_proyecto);
+        $stmt_proyecto->execute([
+            'id' => $proyecto_id,
+            'lider_id' => $usuario_id
+        ]);
+        
+        $proyecto = $stmt_proyecto->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$proyecto) {
+            echo json_encode(['success' => false, 'message' => 'Proyecto no encontrado o no autorizado']);
+            exit;
+        }
+        
+        // Verificar si ya existe caracterización
+        $sql_check = "SELECT id FROM caracterizaciones WHERE proyecto_id = :proyecto_id";
+        $stmt_check = $conn->prepare($sql_check);
+        $stmt_check->execute(['proyecto_id' => $proyecto_id]);
+        $existe_caracterizacion = $stmt_check->fetch();
+        
+        // Preparar datos
+        $restricciones_json = json_encode($_POST['restricciones']);
+        $complejidad_json = json_encode($_POST['complejidad']);
+        $estrategias_json = json_encode($reporte['estrategias']);
+        $tipo_restriccion = $reporte['triple_restriccion']['tipo'];
+        $dominio_cynefin = $reporte['dominio_cynefin'];
+        
+        if ($existe_caracterizacion) {
+            // Actualizar
+            $sql = "UPDATE caracterizaciones SET 
+                    restricciones_json = :restricciones_json,
+                    tipo_restriccion = :tipo_restriccion,
+                    complejidad_json = :complejidad_json,
+                    dominio_cynefin = :dominio_cynefin,
+                    estrategias_json = :estrategias_json,
+                    estado = 'completado',
+                    usuario_id = :usuario_id,
+                    updated_at = NOW()
+                    WHERE proyecto_id = :proyecto_id";
+            
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':restricciones_json' => $restricciones_json,
+                ':tipo_restriccion' => $tipo_restriccion,
+                ':complejidad_json' => $complejidad_json,
+                ':dominio_cynefin' => $dominio_cynefin,
+                ':estrategias_json' => $estrategias_json,
+                ':usuario_id' => $usuario_id,
+                ':proyecto_id' => $proyecto_id
+            ]);
+            
+            $accion = 'actualizada';
+        } else {
+            // Insertar
+            $sql = "INSERT INTO caracterizaciones 
+                    (proyecto_id, restricciones_json, tipo_restriccion, complejidad_json, 
+                     dominio_cynefin, estrategias_json, estado, usuario_id, created_at) 
+                    VALUES (:proyecto_id, :restricciones_json, :tipo_restriccion, :complejidad_json,
+                            :dominio_cynefin, :estrategias_json, 'completado', :usuario_id, NOW())";
+            
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':proyecto_id' => $proyecto_id,
+                ':restricciones_json' => $restricciones_json,
+                ':tipo_restriccion' => $tipo_restriccion,
+                ':complejidad_json' => $complejidad_json,
+                ':dominio_cynefin' => $dominio_cynefin,
+                ':estrategias_json' => $estrategias_json,
+                ':usuario_id' => $usuario_id
+            ]);
+            
+            $accion = 'creada';
+        }
+        
+        // Guardar en sesión
+        $_SESSION['reporte_caracterizacion'] = [
+            'proyecto' => [
+                'id' => $proyecto_id,
+                'nombre' => $proyecto['nombre'],
+                'descripcion' => $proyecto['descripcion']
+            ],
+            'triple_restriccion' => $reporte['triple_restriccion'],
+            'complejidad' => $reporte['complejidad'],
+            'dominio_cynefin' => $reporte['dominio_cynefin'],
+            'estrategias' => $reporte['estrategias']
+        ];
+        
+        $_SESSION['proyecto_id'] = $proyecto_id;
+        $_SESSION['success'] = "Caracterización $accion exitosamente";
+        
+        echo json_encode([
+            'success' => true,
+            'message' => "Caracterización $accion exitosamente",
+            'redirect' => 'views/resultados_caracterizacion.php?proyecto_id=' . $proyecto_id
+        ]);
+        
+    } catch (PDOException $e) {
+        error_log("Error DB en procesar_caracterizacion: " . $e->getMessage());
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Error al guardar: ' . $e->getMessage()
+        ]);
+    } catch (Exception $e) {
+        error_log("Error en procesar_caracterizacion: " . $e->getMessage());
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Error al procesar: ' . $e->getMessage()
+        ]);
+    }
     exit;
 } else {
-    header('Location: ../index.php');
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Método no permitido']);
     exit;
 }
 ?>

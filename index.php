@@ -54,14 +54,15 @@ $authController = new AuthController($db);
 function mostrarVista($vista, $data = []) {
     extract($data);
     
-    $archivos = [
-        'login' => ['views/AuthView.php', 'views/auth_view.php', 'views/login.php'],
-        'register' => ['views/AuthView.php', 'views/auth_view.php', 'views/register.php'],
-        '2fa' => ['views/AuthView.php', 'views/auth_view.php', 'views/2fa.php'],
-        'crear-organizacion' => ['views/AuthView.php', 'views/crear_organizacion.php'],
-        'home' => ['views/Home.php', 'views/home.php'],
-        'landing' => ['views/home_landing.php', 'views/landing.php']
-    ];
+  $archivos = [
+    'login' => ['views/AuthView.php', 'views/auth_view.php', 'views/login.php'],
+    'register' => ['views/AuthView.php', 'views/auth_view.php', 'views/register.php'],
+    '2fa' => ['views/AuthView.php', 'views/auth_view.php', 'views/2fa.php'],
+    'crear-organizacion' => ['views/AuthView.php', 'views/crear_organizacion.php'],
+    'home' => ['views/Home.php', 'views/home.php'],
+    'lider_home' => ['views/lider_home.php', 'views/LiderHome.php'], // ✅ AGREGAR ESTO
+    'landing' => ['views/home_landing.php', 'views/landing.php']
+];
     
     if (isset($archivos[$vista])) {
         foreach ($archivos[$vista] as $archivo) {
@@ -208,6 +209,30 @@ elseif ($action) {
                 exit;
             }
             break;
+
+            // -------- HOME LÍDER --------
+case 'lider_home':
+    error_log("🏠 Mostrando LIDER HOME");
+    verificarAutenticacion();
+    
+    // Verificar que sea líder (rol_id = 2)
+    if (($_SESSION['usuario']['rol_id'] ?? 0) != 2) {
+        $_SESSION['error'] = "Acceso denegado. Esta área es solo para líderes.";
+        header('Location: index.php?action=home');
+        exit;
+    }
+    
+    // Cargar vista de líder
+    if (file_exists('views/lider_home.php')) {
+        require_once 'views/lider_home.php';
+        exit;
+    } else {
+        error_log("❌ views/lider_home.php no existe");
+        $_SESSION['error'] = "Vista de líder no disponible";
+        header('Location: index.php?action=home');
+        exit;
+    }
+    break;
         
         // -------- LOGOUT --------
         case 'logout':
@@ -224,11 +249,18 @@ elseif ($action) {
             break;
         
         // -------- HOME --------
-        case 'home':
-            error_log("🏠 Mostrando HOME");
-            verificarAutenticacion();
-            mostrarVista('home');
-            break;
+       case 'home':
+    error_log("🏠 Mostrando HOME");
+    verificarAutenticacion();
+    
+    // Si es líder, redirigir a su dashboard
+    if (($_SESSION['usuario']['rol_id'] ?? 0) == 2) {
+        header('Location: index.php?action=lider_home');
+        exit;
+    }
+    
+    mostrarVista('home');
+    break;
         
         // -------- ELIMINAR PROYECTO --------
         case 'eliminar_proyecto':

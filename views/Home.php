@@ -17,7 +17,23 @@ $db = $database->getConnection();
 
 if (!($db instanceof PDO)) die("ERROR: No se pudo conectar a la base de datos");
 
-// Detectar ruta base para los controladores
+// ====== SOLUCIÓN DEFINITIVA DE RUTAS ======
+// Opción 1: Configuración manual (LA MÁS CONFIABLE)
+// Descomenta y ajusta según tu entorno:
+
+// Para LOCALHOST con carpeta de proyecto:
+$base_web_url = 'http://localhost/proyecto_caracterizacion';
+
+// Para LOCALHOST en raíz (sin carpeta):
+// $base_web_url = 'http://localhost';
+
+// Para HOSTING:
+// $base_web_url = 'https://tudominio.com';
+
+// Para HOSTING con subdirectorio:
+// $base_web_url = 'https://tudominio.com/sistema';
+
+// Para includes PHP (rutas de archivos)
 $base_path = (basename(dirname(__FILE__)) === 'views') ? '../controllers/' : 'controllers/';
 
 // 3. VARIABLES
@@ -29,27 +45,54 @@ unset($_SESSION['error'], $_SESSION['success']);
 
 $seccion_activa = $_GET['seccion'] ?? 'proyectos';
 
+// Obtener organización del usuario
+$organizacion_id = $_SESSION['usuario']['organizacion_id'] ?? null;
+
 // 4. CARGAR DATOS
 try {
-    // PROYECTOS
-    $stmt = $db->prepare("
+    // PROYECTOS - Filtrados por organización si existe
+    $sql_proyectos = "
         SELECT p.id, p.nombre AS nombre_proyecto, p.descripcion AS descripcion_proyecto,
                COALESCE(p.horas, 0) as horas, COALESCE(p.estado, 'pendiente') as estado,
                p.fecha_inicio, p.fecha_fin, p.lider_proyecto_id, p.created_at,
                CONCAT(u.nombre, ' ', u.apellido) AS nombre_lider
         FROM proyectos p
-        LEFT JOIN usuarios u ON p.lider_proyecto_id = u.id
-        ORDER BY p.created_at DESC
-    ");
+        LEFT JOIN usuarios u ON p.lider_proyecto_id = u.id";
+    
+    if ($organizacion_id) {
+        $sql_proyectos .= " WHERE p.organizacion_id = :org_id";
+    }
+    
+    $sql_proyectos .= " ORDER BY p.created_at DESC";
+    
+    $stmt = $db->prepare($sql_proyectos);
+    if ($organizacion_id) {
+        $stmt->bindParam(':org_id', $organizacion_id, PDO::PARAM_INT);
+    }
     $stmt->execute();
     $proyectos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // LÍDERES
-    $sql = "SELECT id, nombre, apellido, email, usuario, telefono, creado_en FROM usuarios WHERE rol_id = 2";
+    // LÍDERES - Filtrados por organización si existe
+    $sql_lideres = "SELECT id, nombre, apellido, email, usuario, telefono, creado_en 
+                    FROM usuarios 
+                    WHERE rol_id = 2";
+    
+    if ($organizacion_id) {
+        $sql_lideres .= " AND organizacion_id = :org_id";
+    }
+    
     $stmt = $db->query("SHOW COLUMNS FROM usuarios LIKE 'esta_borrado'");
-    if ($stmt->rowCount() > 0) $sql .= " AND esta_borrado = 0";
-    $sql .= " ORDER BY nombre";
-    $stmt = $db->query($sql);
+    if ($stmt->rowCount() > 0) {
+        $sql_lideres .= " AND esta_borrado = 0";
+    }
+    
+    $sql_lideres .= " ORDER BY nombre";
+    
+    $stmt = $db->prepare($sql_lideres);
+    if ($organizacion_id) {
+        $stmt->bindParam(':org_id', $organizacion_id, PDO::PARAM_INT);
+    }
+    $stmt->execute();
     $lideres = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // ORGANIZACIÓN
@@ -780,7 +823,8 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                     class="text-white hover:text-gray-200 text-3xl font-bold transition">&times;</button>
             </div>
 
-            <form action="<?= $base_path ?>ProyectoController.php?action=crear" method="POST" class="p-6">
+            <form action="<?= $base_web_url ?>/controllers/ProyectoController.php?action=crear" method="POST"
+                class="p-6">
                 <div class="space-y-5">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre del Proyecto *</label>
@@ -995,7 +1039,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
             </div>
 
-            <form action="<?= $base_path ?>LiderController.php?action=editar" method="POST" class="p-6">
+            <form action="<?= $base_web_url ?>/controllers/LiderController.php?action=editar" method="POST" class="p-6">
                 <input type="hidden" name="id" id="edit_lider_id">
                 <div class="space-y-5">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1059,7 +1103,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
             </div>
 
-            <form action="<?= $base_path ?>LiderController.php?action=crear" method="POST" class="p-6">
+            <form action="<?= $base_web_url ?>/controllers/LiderController.php?action=crear" method="POST" class="p-6">
                 <div class="space-y-5">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -1147,7 +1191,8 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
             </div>
 
-            <form action="<?= $base_path ?>OrganizacionController.php?action=editar" method="POST" class="p-6">
+            <form action="<?= $base_web_url ?>/controllers/OrganizacionController.php?action=editar" method="POST"
+                class="p-6">
                 <input type="hidden" name="id" value="<?= $mi_organizacion['id'] ?>">
                 <div class="space-y-5">
                     <div>
@@ -1279,7 +1324,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                         class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition">
                         Cancelar
                     </button>
-                    <a href="<?= $base_path ?>../index.php?action=logout"
+                    <a href="<?= $base_web_url ?>/index.php?action=logout"
                         class="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium text-center shadow-lg transition">
                         Sí, Salir
                     </a>
@@ -1290,7 +1335,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
 
     <script>
     // CONFIGURACIÓN DE RUTAS
-    const BASE_PATH = '<?= $base_path ?>';
+    const BASE_WEB_URL = '<?= $base_web_url ?>';
 
     // GESTIÓN DE MODALES
     function openModal(id) {

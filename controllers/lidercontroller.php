@@ -1,8 +1,7 @@
 <?php
 // ========================================
-// CONTROLLERS/LiderController.php
-// CRUD COMPLETO DE LÍDERES
-// Con envío automático de credenciales por email usando mail() nativo
+// CONTROLLERS/LiderController.php - ACTUALIZADO
+// CRUD COMPLETO DE LÍDERES CON ORGANIZACION_ID
 // ========================================
 
 session_start();
@@ -29,10 +28,41 @@ class LiderController {
         $this->db = $database->getConnection();
     }
     
+    // ===== NUEVO: OBTENER ORGANIZACIÓN DEL ADMIN ACTUAL =====
+    private function obtenerOrganizacionAdmin() {
+        try {
+            if (!isset($_SESSION['usuario_id'])) {
+                return null;
+            }
+            
+            $admin_id = $_SESSION['usuario_id'];
+            
+            // Buscar la organización donde este usuario es admin
+            $stmt = $this->db->prepare("
+                SELECT id, nombre 
+                FROM organizaciones 
+                WHERE usuario_admin_id = ?
+                LIMIT 1
+            ");
+            $stmt->execute([$admin_id]);
+            $organizacion = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $organizacion;
+            
+        } catch (Exception $e) {
+            error_log("Error al obtener organización: " . $e->getMessage());
+            return null;
+        }
+    }
+    
     // ===== ENVIAR EMAIL CON CREDENCIALES =====
     private function enviarCredencialesPorEmail($email, $nombre, $apellido, $usuario, $contrasena_texto) {
+        // Obtener información de la organización para el email
+        $organizacion = $this->obtenerOrganizacionAdmin();
+        $org_nombre = $organizacion['nombre'] ?? 'Sistema de Caracterización';
+        
         $nombre_completo = $nombre . ' ' . $apellido;
-        $asunto = "🔐 Credenciales de Acceso - Sistema de Caracterización";
+        $asunto = "🔐 Credenciales de Acceso - " . htmlspecialchars($org_nombre);
         
         $mensaje = "
         <!DOCTYPE html>
@@ -49,16 +79,22 @@ class LiderController {
                 .credential-value { background: #e8eaf6; padding: 10px 15px; border-radius: 5px; font-family: monospace; font-size: 16px; }
                 .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; background: white; }
                 .warning { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin: 20px 0; color: #856404; }
+                .org-info { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
             </style>
         </head>
         <body>
             <div class='container'>
                 <div class='header'>
-                    <h1>🎉 ¡Bienvenido al Sistema de Caracterización!</h1>
+                    <h1>🎉 ¡Bienvenido a " . htmlspecialchars($org_nombre) . "!</h1>
                 </div>
                 <div class='content'>
                     <p>Hola <strong>{$nombre_completo}</strong>,</p>
-                    <p>Has sido registrado como <strong>Líder de Proyecto</strong>.</p>
+                    <p>Has sido registrado como <strong>Líder de Proyecto</strong> en <strong>" . htmlspecialchars($org_nombre) . "</strong>.</p>
+                    
+                    <div class='org-info'>
+                        <p><strong>🏢 Organización:</strong> " . htmlspecialchars($org_nombre) . "</p>
+                        <p><strong>👤 Rol:</strong> Líder de Proyecto</p>
+                    </div>
                     
                     <div class='credentials'>
                         <p><span class='credential-label'>👤 Usuario:</span><br><span class='credential-value'>{$usuario}</span></p>
@@ -85,13 +121,13 @@ class LiderController {
         </html>
         ";
         
-        // Headers para email HTML usando la configuración SMTP
+        // Headers para email HTML
         $headers = "MIME-Version: 1.0\r\n";
         $headers .= "Content-type: text/html; charset=UTF-8\r\n";
         $headers .= "From: " . $this->smtp_config['from_name'] . " <" . $this->smtp_config['from_email'] . ">\r\n";
         $headers .= "Reply-To: " . $this->smtp_config['from_email'] . "\r\n";
         $headers .= "X-Mailer: PHP/" . phpversion();
-        $headers .= "X-Priority: 1\r\n"; // Alta prioridad
+        $headers .= "X-Priority: 1\r\n";
         
         // Log para depuración
         error_log("Intentando enviar credenciales a: {$email}");
@@ -105,7 +141,7 @@ class LiderController {
         return $enviado;
     }
     
-    // ===== CREAR LÍDER =====
+    // ===== CREAR LÍDER (ACTUALIZADO CON ORGANIZACION_ID) =====
     public function crear() {
         try {
             $nombre = trim($_POST['nombre'] ?? '');
@@ -144,6 +180,16 @@ class LiderController {
                 throw new Exception('La contraseña debe tener al menos 6 caracteres');
             }
             
+            // 🔴 NUEVO: Obtener organización del admin que está creando
+            $organizacion = $this->obtenerOrganizacionAdmin();
+            
+            if (!$organizacion || !isset($organizacion['id'])) {
+                throw new Exception('No se pudo identificar la organización. Debes ser administrador de una organización para crear líderes.');
+            }
+            
+            $organizacion_id = $organizacion['id'];
+            $organizacion_nombre = $organizacion['nombre'];
+            
             // Verificar que el email no exista
             $stmt = $this->db->prepare("SELECT id FROM usuarios WHERE email = ? LIMIT 1");
             $stmt->execute([$email]);
@@ -164,9 +210,9 @@ class LiderController {
             // Encriptar contraseña para la base de datos
             $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
             
-            // Insertar usuario con rol_id = 2 (LÍDER)
-            $sql = "INSERT INTO usuarios (nombre, apellido, email, telefono, usuario, contrasena, rol_id, creado_en) 
-                    VALUES (?, ?, ?, ?, ?, ?, 2, NOW())";
+            // 🔴 MODIFICADO: Insertar usuario con organizacion_id
+            $sql = "INSERT INTO usuarios (nombre, apellido, email, telefono, usuario, contrasena, rol_id, organizacion_id, creado_en) 
+                    VALUES (?, ?, ?, ?, ?, ?, 2, ?, NOW())";
             
             $stmt = $this->db->prepare($sql);
             $result = $stmt->execute([
@@ -175,7 +221,8 @@ class LiderController {
                 $email,
                 $telefono,
                 $usuario,
-                $contrasena_hash
+                $contrasena_hash,
+                $organizacion_id  // 🔴 NUEVO PARÁMETRO
             ]);
             
             if ($result) {
@@ -185,20 +232,25 @@ class LiderController {
                 $email_enviado = $this->enviarCredencialesPorEmail($email, $nombre, $apellido, $usuario, $contrasena_texto);
                 
                 if ($email_enviado) {
-                    $_SESSION['success'] = "✅ Líder '{$nombre} {$apellido}' creado exitosamente<br>📧 Credenciales enviadas a: {$email}";
+                    $_SESSION['success'] = "✅ Líder '{$nombre} {$apellido}' creado exitosamente en {$organizacion_nombre}<br>📧 Credenciales enviadas a: {$email}";
                 } else {
-                    // IMPORTANTE: Guardar credenciales en sesión para mostrar en pantalla
+                    // Guardar credenciales en sesión
                     $_SESSION['credenciales_lider'] = [
                         'id' => $lider_id,
                         'nombre' => $nombre . ' ' . $apellido,
                         'email' => $email,
                         'usuario' => $usuario,
                         'contrasena' => $contrasena_texto,
+                        'organizacion' => $organizacion_nombre,
                         'fecha' => date('d/m/Y H:i:s')
                     ];
                     
-                    $_SESSION['success'] = "✅ Líder '{$nombre} {$apellido}' creado exitosamente";
+                    $_SESSION['success'] = "✅ Líder '{$nombre} {$apellido}' creado exitosamente en {$organizacion_nombre}";
                 }
+                
+                // Log
+                error_log("NUEVO LÍDER: {$nombre} {$apellido} creado en organización {$organizacion_nombre} (ID: {$organizacion_id})");
+                
             } else {
                 throw new Exception('Error al crear el líder en la base de datos');
             }
@@ -216,12 +268,14 @@ class LiderController {
         if(isset($_GET['id'])) {
             $id = $_GET['id'];
             
-            // Obtener líder
+            // 🔴 MODIFICADO: Incluir información de la organización
             $stmt = $this->db->prepare("
                 SELECT u.id, u.nombre, u.apellido, u.email, u.usuario, u.telefono, 
-                       u.creado_en, u.activo,
+                       u.creado_en, u.activo, u.organizacion_id,
+                       o.nombre as organizacion_nombre,
                        COUNT(p.id) as proyectos_count
                 FROM usuarios u 
+                LEFT JOIN organizaciones o ON u.organizacion_id = o.id
                 LEFT JOIN proyectos p ON u.id = p.lider_proyecto_id
                 WHERE u.id = ? AND u.rol_id = 2
                 GROUP BY u.id
@@ -230,7 +284,6 @@ class LiderController {
             $lider = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if($lider) {
-                // HTML para mostrar en el modal
                 echo '
                 <div class="space-y-6">
                     <div class="flex items-center space-x-4 mb-6">
@@ -239,8 +292,17 @@ class LiderController {
                         </div>
                         <div>
                             <h3 class="text-2xl font-bold text-gray-800">' . htmlspecialchars($lider['nombre'] . ' ' . $lider['apellido']) . '</h3>
-                            <p class="text-gray-600">Líder de Proyecto</p>
-                        </div>
+                            <p class="text-gray-600">Líder de Proyecto</p>';
+                
+                // 🔴 NUEVO: Mostrar organización
+                if (!empty($lider['organizacion_nombre'])) {
+                    echo '<p class="text-sm text-gray-500 mt-1">
+                            <i class="fas fa-building mr-1"></i>
+                            ' . htmlspecialchars($lider['organizacion_nombre']) . '
+                          </p>';
+                }
+                
+                echo '</div>
                     </div>
                     
                     <div class="grid md:grid-cols-2 gap-6">
@@ -267,9 +329,17 @@ class LiderController {
                                 </span>
                             </p>
                         </div>
-                    </div>
-                    
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                    </div>';
+                
+                // 🔴 NUEVO: Mostrar organización si existe
+                if (!empty($lider['organizacion_nombre'])) {
+                    echo '<div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-sm text-blue-500 font-medium mb-2">Organización</p>
+                            <p class="text-gray-800 font-semibold">' . htmlspecialchars($lider['organizacion_nombre']) . '</p>
+                          </div>';
+                }
+                
+                echo '<div class="bg-gray-50 p-4 rounded-lg">
                         <p class="text-sm text-gray-500 font-medium mb-2">Proyectos Asignados</p>
                         <p class="text-gray-800">' . $lider['proyectos_count'] . ' proyecto(s)</p>
                     </div>
@@ -300,7 +370,7 @@ class LiderController {
             $apellido = trim($_POST['apellido'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $telefono = trim($_POST['telefono'] ?? '');
-            $contrasena_nueva = trim($_POST['contrasena'] ?? ''); // Campo opcional en edición
+            $contrasena_nueva = trim($_POST['contrasena'] ?? '');
             
             // Validaciones
             if ($id <= 0) {
@@ -323,8 +393,8 @@ class LiderController {
                 throw new Exception('El email no es válido');
             }
             
-            // Obtener usuario actual para no cambiarlo
-            $stmt = $this->db->prepare("SELECT usuario FROM usuarios WHERE id = ? AND rol_id = 2 LIMIT 1");
+            // Obtener usuario actual
+            $stmt = $this->db->prepare("SELECT usuario, organizacion_id FROM usuarios WHERE id = ? AND rol_id = 2 LIMIT 1");
             $stmt->execute([$id]);
             $lider_existente = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -333,6 +403,7 @@ class LiderController {
             }
             
             $usuario = $lider_existente['usuario'];
+            $organizacion_id = $lider_existente['organizacion_id'];
             
             // Verificar que el email no esté usado por otro usuario
             $stmt = $this->db->prepare("SELECT id FROM usuarios WHERE email = ? AND id != ? LIMIT 1");
