@@ -1,6 +1,6 @@
 <?php
 // ========================================
-// CONTROLLERS/ProyectoController.php
+// CONTROLLERS/ProyectoController.php - VERSIÓN CORREGIDA
 // ========================================
 
 session_start();
@@ -18,11 +18,45 @@ $database = new Database();
 $db = $database->getConnection();
 $proyecto = new Proyecto($db);
 
+// ===== FUNCIÓN HELPER: OBTENER organizacion_id DESDE LA BD =====
+function obtenerOrganizacionUsuario($db, $usuario_id) {
+    try {
+        $stmt = $db->prepare("SELECT organizacion_id FROM usuarios WHERE id = ? LIMIT 1");
+        $stmt->execute([$usuario_id]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($usuario && isset($usuario['organizacion_id'])) {
+            return intval($usuario['organizacion_id']);
+        }
+        return null;
+    } catch (PDOException $e) {
+        error_log("Error al obtener organizacion_id: " . $e->getMessage());
+        return null;
+    }
+}
+
+// ===== OBTENER DATOS DEL USUARIO =====
+$usuario_id = isset($_SESSION['usuario']['id']) ? intval($_SESSION['usuario']['id']) : 0;
+
+// Consultar organizacion_id desde la BD (NO desde la sesión)
+$organizacion_id = obtenerOrganizacionUsuario($db, $usuario_id);
+
+// Validar que el usuario tenga organización asignada
+if (!$organizacion_id || $organizacion_id <= 0) {
+    $_SESSION['error'] = "Tu usuario no tiene una organización asignada. Por favor ejecuta: <code>UPDATE usuarios SET organizacion_id = 8 WHERE id = {$usuario_id};</code>";
+    header('Location: ../views/home.php?seccion=proyectos');
+    exit;
+}
+
+// Log para debug
+error_log("ProyectoController - Usuario ID: {$usuario_id}, Organización ID (BD): {$organizacion_id}");
+
 $action = $_GET['action'] ?? $_POST['action'] ?? 'listar';
 
 switch ($action) {
     case 'crear':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            
             $datos = [
                 'nombre' => trim($_POST['nombre']),
                 'descripcion' => trim($_POST['descripcion'] ?? ''),
@@ -30,7 +64,9 @@ switch ($action) {
                 'estado' => $_POST['estado'] ?? 'pendiente',
                 'lider_proyecto_id' => (int)$_POST['lider_proyecto_id'],
                 'fecha_inicio' => $_POST['fecha_inicio'] ?? null,
-                'fecha_fin' => $_POST['fecha_fin'] ?? null
+                'fecha_fin' => $_POST['fecha_fin'] ?? null,
+                'organizacion_id' => $organizacion_id,  // ← DESDE LA BD
+                'usuario_id' => $usuario_id             // ← DE LA SESIÓN
             ];
 
             // Validaciones
@@ -52,12 +88,33 @@ switch ($action) {
                 exit;
             }
 
+            // Validar que el líder pertenezca a la misma organización
+            $stmt = $db->prepare("SELECT id, organizacion_id FROM usuarios WHERE id = ? AND rol_id = 2");
+            $stmt->execute([$datos['lider_proyecto_id']]);
+            $lider = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$lider) {
+                $_SESSION['error'] = 'El líder seleccionado no existe';
+                header('Location: ../views/home.php?seccion=proyectos');
+                exit;
+            }
+            
+            if ($lider['organizacion_id'] != $organizacion_id) {
+                $_SESSION['error'] = "El líder seleccionado no pertenece a tu organización. Líder org: {$lider['organizacion_id']}, Tu org: {$organizacion_id}";
+                header('Location: ../views/home.php?seccion=proyectos');
+                exit;
+            }
+
+            // Log antes de crear
+            error_log("Creando proyecto con datos: " . print_r($datos, true));
+
             $resultado = $proyecto->crear($datos);
 
             if ($resultado) {
                 $_SESSION['success'] = "Proyecto '{$datos['nombre']}' creado exitosamente";
             } else {
-                $_SESSION['error'] = 'Error al crear el proyecto';
+                $_SESSION['error'] = 'Error al crear el proyecto. Revisa los logs del servidor.';
+                error_log("Error al crear proyecto: " . print_r($datos, true));
             }
 
             header('Location: ../views/home.php?seccion=proyectos');
@@ -68,7 +125,19 @@ switch ($action) {
     case 'ver':
         if (isset($_GET['id'])) {
             $id = (int)$_GET['id'];
+            
             $datos = $proyecto->obtenerPorId($id);
+
+            // Validar pertenencia a la organización
+            if ($datos && $datos['organizacion_id'] != $organizacion_id) {
+                echo '<div class="text-center py-12">';
+                echo '<div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">';
+                echo '<i class="fas fa-lock text-4xl text-red-600"></i>';
+                echo '</div>';
+                echo '<p class="text-red-600 font-medium">No tienes permiso para ver este proyecto</p>';
+                echo '</div>';
+                exit;
+            }
 
             if ($datos) {
                 // Generar HTML para el modal
@@ -127,10 +196,23 @@ switch ($action) {
         <p class="text-gray-800"><?= nl2br(htmlspecialchars($datos['descripcion'])) ?></p>
     </div>
     <?php endif; ?>
+
+    <!-- Debug info -->
+    <div class="bg-blue-50 border-l-4 border-blue-600 p-3 text-xs">
+        <p class="text-gray-600">
+            <strong>Debug:</strong> Org ID: <?= $datos['organizacion_id'] ?> |
+            Creado por: Usuario #<?= $datos['usuario_id'] ?? 'N/A' ?>
+        </p>
+    </div>
 </div>
 <?php
             } else {
-                echo '<p class="text-red-600 text-center py-4">Proyecto no encontrado</p>';
+                echo '<div class="text-center py-12">';
+                echo '<div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">';
+                echo '<i class="fas fa-inbox text-4xl text-gray-300"></i>';
+                echo '</div>';
+                echo '<p class="text-gray-600 font-medium">Proyecto no encontrado</p>';
+                echo '</div>';
             }
         }
         exit;
@@ -138,10 +220,15 @@ switch ($action) {
     case 'datos':
         if (isset($_GET['id'])) {
             $id = (int)$_GET['id'];
+            
             $datos = $proyecto->obtenerPorId($id);
 
             header('Content-Type: application/json');
-            if ($datos) {
+            
+            // Validar pertenencia a la organización
+            if ($datos && $datos['organizacion_id'] != $organizacion_id) {
+                echo json_encode(['error' => 'No tienes permiso para acceder a este proyecto']);
+            } elseif ($datos) {
                 echo json_encode($datos);
             } else {
                 echo json_encode(['error' => 'Proyecto no encontrado']);
@@ -152,6 +239,14 @@ switch ($action) {
     case 'editar':
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
             $id = (int)$_POST['id'];
+
+            // Verificar que el proyecto pertenece a la organización
+            $proyecto_actual = $proyecto->obtenerPorId($id);
+            if (!$proyecto_actual || $proyecto_actual['organizacion_id'] != $organizacion_id) {
+                $_SESSION['error'] = 'No tienes permiso para editar este proyecto';
+                header('Location: ../views/home.php?seccion=proyectos');
+                exit;
+            }
             
             $datos = [
                 'nombre' => trim($_POST['nombre']),
@@ -160,12 +255,31 @@ switch ($action) {
                 'estado' => $_POST['estado'] ?? 'pendiente',
                 'lider_proyecto_id' => (int)$_POST['lider_proyecto_id'],
                 'fecha_inicio' => $_POST['fecha_inicio'] ?? null,
-                'fecha_fin' => $_POST['fecha_fin'] ?? null
+                'fecha_fin' => $_POST['fecha_fin'] ?? null,
+                'organizacion_id' => $organizacion_id,  // ← MANTENER LA ORGANIZACIÓN
+                'usuario_id' => $usuario_id             // ← MANTENER EL USUARIO
             ];
 
             // Validaciones
             if (empty($datos['nombre'])) {
                 $_SESSION['error'] = 'El nombre del proyecto es obligatorio';
+                header('Location: ../views/home.php?seccion=proyectos');
+                exit;
+            }
+
+            // Validar que el líder pertenezca a la misma organización
+            $stmt = $db->prepare("SELECT id, organizacion_id FROM usuarios WHERE id = ? AND rol_id = 2");
+            $stmt->execute([$datos['lider_proyecto_id']]);
+            $lider = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$lider) {
+                $_SESSION['error'] = 'El líder seleccionado no existe';
+                header('Location: ../views/home.php?seccion=proyectos');
+                exit;
+            }
+            
+            if ($lider['organizacion_id'] != $organizacion_id) {
+                $_SESSION['error'] = 'El líder seleccionado no pertenece a tu organización';
                 header('Location: ../views/home.php?seccion=proyectos');
                 exit;
             }
@@ -186,6 +300,14 @@ switch ($action) {
     case 'eliminar':
         if (isset($_GET['id'])) {
             $id = (int)$_GET['id'];
+            
+            // Verificar que el proyecto pertenece a la organización
+            $proyecto_actual = $proyecto->obtenerPorId($id);
+            if (!$proyecto_actual || $proyecto_actual['organizacion_id'] != $organizacion_id) {
+                $_SESSION['error'] = 'No tienes permiso para eliminar este proyecto';
+                header('Location: ../views/home.php?seccion=proyectos');
+                exit;
+            }
             
             $resultado = $proyecto->eliminar($id);
 

@@ -1,11 +1,14 @@
 <?php
 // ========================================
-// VIEWS/HOME.PHP - DASHBOARD INTERACTIVO MEJORADO
+// VIEWS/HOME.PHP - DASHBOARD MEJORADO
 // ========================================
 
-// 1. INICIAR SESIÓN
+// 1. INICIAR SESIÓN Y VERIFICACIÓN
 if (session_status() == PHP_SESSION_NONE) session_start();
-if (!isset($_SESSION['usuario'])) {
+
+// Verificar si hay sesión activa
+$sesion_activa = isset($_SESSION['usuario']);
+if (!$sesion_activa) {
     header('Location: ../index.php?action=login_view');
     exit;
 }
@@ -17,111 +20,214 @@ $db = $database->getConnection();
 
 if (!($db instanceof PDO)) die("ERROR: No se pudo conectar a la base de datos");
 
-// ====== SOLUCIÓN DEFINITIVA DE RUTAS ======
-// Opción 1: Configuración manual (LA MÁS CONFIABLE)
-// Descomenta y ajusta según tu entorno:
-
-// Para LOCALHOST con carpeta de proyecto:
+// ====== CONFIGURACIÓN DE RUTAS ======
 $base_web_url = 'http://localhost/proyecto_caracterizacion';
-
-// Para LOCALHOST en raíz (sin carpeta):
-// $base_web_url = 'http://localhost';
-
-// Para HOSTING:
-// $base_web_url = 'https://tudominio.com';
-
-// Para HOSTING con subdirectorio:
-// $base_web_url = 'https://tudominio.com/sistema';
-
-// Para includes PHP (rutas de archivos)
 $base_path = (basename(dirname(__FILE__)) === 'views') ? '../controllers/' : 'controllers/';
 
-// 3. VARIABLES
-$proyectos = $dominios = $perfiles = $caracteristicas = $paises = $lideres = [];
+// 3. MANEJO DE IDIOMA
+$idioma = $_COOKIE['idioma'] ?? 'es';
+$textos = [
+    'es' => [
+        'titulo_sistema' => 'Marco Cynefin',
+        'titulo_dashboard' => 'Dashboard',
+        'gestion_proyectos' => 'Gestión de Proyectos',
+        'sistema_caracterizacion' => 'Sistema de Caracterización - Framework Cynefin',
+        'bienvenido' => '¡Bienvenido Administrador',
+        'debes_iniciar_sesion' => 'Debes iniciar sesión primero',
+        'proyectos_activos' => 'Proyectos Activos',
+        'proyectos_registrados' => 'proyecto(s) registrado(s)',
+        'nuevo_proyecto' => 'Nuevo Proyecto',
+        'crear_nuevo_proyecto' => 'Crear Nuevo Proyecto',
+        'crear_nuevo_lider' => 'Crear Nuevo Líder',
+        'idioma' => 'Idioma',
+        'espanol' => 'Español',
+        'ingles' => 'Inglés',
+        'sin_lideres' => 'No hay líderes disponibles',
+        'crear_lider_primero' => 'Debes crear al menos un líder antes de crear proyectos',
+        'ir_a_lideres' => 'Ir a Líderes'
+    ],
+    'en' => [
+        'titulo_sistema' => 'Cynefin Framework',
+        'titulo_dashboard' => 'Dashboard',
+        'gestion_proyectos' => 'Project Management',
+        'sistema_caracterizacion' => 'Characterization System - Cynefin Framework',
+        'bienvenido' => 'Welcome Administrator',
+        'debes_iniciar_sesion' => 'You must login first',
+        'proyectos_activos' => 'Active Projects',
+        'proyectos_registrados' => 'project(s) registered',
+        'nuevo_proyecto' => 'New Project',
+        'crear_nuevo_proyecto' => 'Create New Project',
+        'crear_nuevo_lider' => 'Create New Leader',
+        'idioma' => 'Language',
+        'espanol' => 'Spanish',
+        'ingles' => 'English',
+        'sin_lideres' => 'No leaders available',
+        'crear_lider_primero' => 'You must create at least one leader before creating projects',
+        'ir_a_lideres' => 'Go to Leaders'
+    ]
+];
+
+$t = $textos[$idioma] ?? $textos['es'];
+
+// 4. VARIABLES
+$proyectos = $lideres = [];
 $mi_organizacion = null;
+$organizacion_id_real = null; // ← VARIABLE CLAVE: organizacion_id obtenida de la BD
 $error_message = $_SESSION['error'] ?? null;
 $success_message = $_SESSION['success'] ?? null;
 unset($_SESSION['error'], $_SESSION['success']);
 
 $seccion_activa = $_GET['seccion'] ?? 'proyectos';
+$puede_crear_proyectos = false;
 
-// Obtener organización del usuario
-$organizacion_id = $_SESSION['usuario']['organizacion_id'] ?? null;
-
-// 4. CARGAR DATOS
+// 5. OBTENER ORGANIZACIÓN DEL USUARIO DIRECTAMENTE DESDE LA BD
 try {
-    // PROYECTOS - Filtrados por organización si existe
-    $sql_proyectos = "
-        SELECT p.id, p.nombre AS nombre_proyecto, p.descripcion AS descripcion_proyecto,
-               COALESCE(p.horas, 0) as horas, COALESCE(p.estado, 'pendiente') as estado,
-               p.fecha_inicio, p.fecha_fin, p.lider_proyecto_id, p.created_at,
-               CONCAT(u.nombre, ' ', u.apellido) AS nombre_lider
-        FROM proyectos p
-        LEFT JOIN usuarios u ON p.lider_proyecto_id = u.id";
-    
-    if ($organizacion_id) {
-        $sql_proyectos .= " WHERE p.organizacion_id = :org_id";
-    }
-    
-    $sql_proyectos .= " ORDER BY p.created_at DESC";
-    
-    $stmt = $db->prepare($sql_proyectos);
-    if ($organizacion_id) {
-        $stmt->bindParam(':org_id', $organizacion_id, PDO::PARAM_INT);
-    }
-    $stmt->execute();
-    $proyectos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // LÍDERES - Filtrados por organización si existe
-    $sql_lideres = "SELECT id, nombre, apellido, email, usuario, telefono, creado_en 
-                    FROM usuarios 
-                    WHERE rol_id = 2";
-    
-    if ($organizacion_id) {
-        $sql_lideres .= " AND organizacion_id = :org_id";
-    }
-    
-    $stmt = $db->query("SHOW COLUMNS FROM usuarios LIKE 'esta_borrado'");
-    if ($stmt->rowCount() > 0) {
-        $sql_lideres .= " AND esta_borrado = 0";
-    }
-    
-    $sql_lideres .= " ORDER BY nombre";
-    
-    $stmt = $db->prepare($sql_lideres);
-    if ($organizacion_id) {
-        $stmt->bindParam(':org_id', $organizacion_id, PDO::PARAM_INT);
-    }
-    $stmt->execute();
-    $lideres = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // ORGANIZACIÓN
     $usuario_id = $_SESSION['usuario']['id'] ?? 0;
+    
+    echo "<!-- ========================================== -->\n";
+    echo "<!-- DEBUG MEJORADO - CARGA DE DATOS -->\n";
+    echo "<!-- ========================================== -->\n";
+    echo "<!-- Usuario ID de sesión: {$usuario_id} -->\n";
+    
     if ($usuario_id > 0) {
-        $stmt = $db->prepare("SELECT * FROM organizaciones WHERE id = 1 OR usuario_admin_id = ? LIMIT 1");
+        // ===== PASO 1: CONSULTAR organizacion_id DEL USUARIO DESDE LA BD =====
+        $stmt = $db->prepare("SELECT organizacion_id FROM usuarios WHERE id = ? LIMIT 1");
         $stmt->execute([$usuario_id]);
-        $mi_organizacion = $stmt->fetch(PDO::FETCH_ASSOC);
+        $usuario_data = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        echo "<!-- Usuario encontrado en BD: " . ($usuario_data ? 'SÍ' : 'NO') . " -->\n";
+        
+        if ($usuario_data && isset($usuario_data['organizacion_id'])) {
+            $organizacion_id_real = $usuario_data['organizacion_id'];
+            echo "<!-- ✅ Organización ID obtenida desde BD: {$organizacion_id_real} -->\n";
+            
+            // ===== PASO 2: CARGAR DATOS COMPLETOS DE LA ORGANIZACIÓN =====
+            $stmt = $db->prepare("SELECT * FROM organizaciones WHERE id = ? LIMIT 1");
+            $stmt->execute([$organizacion_id_real]);
+            $mi_organizacion = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            echo "<!-- Organización cargada: " . ($mi_organizacion ? $mi_organizacion['nombre'] : 'NO ENCONTRADA') . " -->\n";
+        } else {
+            echo "<!-- ❌ PROBLEMA: Usuario NO tiene organizacion_id en la BD -->\n";
+            $error_message = "Tu usuario no tiene una organización asignada. Por favor, ejecuta el siguiente SQL en phpMyAdmin:<br><code>UPDATE usuarios SET organizacion_id = 8 WHERE id = {$usuario_id};</code>";
+        }
     }
     
-    if (!$mi_organizacion) {
-        $mi_organizacion = [
-            'id' => 0, 'nombre' => 'Mi Organización', 'descripcion' => 'Completar perfil',
-            'direccion' => 'No especificada', 'telefono' => 'No disponible',
-            'email' => $_SESSION['usuario']['email'] ?? 'admin@organizacion.com',
-            'activo' => 1, 'fecha_registro' => date('Y-m-d H:i:s')
-        ];
+    // ===== CONSULTA DEBUG: VER TODOS LOS LÍDERES SIN FILTRO =====
+    $stmt_debug = $db->query("SELECT id, nombre, apellido, usuario, organizacion_id, rol_id FROM usuarios WHERE rol_id = 2");
+    $todos_lideres_debug = $stmt_debug->fetchAll(PDO::FETCH_ASSOC);
+    echo "<!-- Total líderes en BD (rol_id=2): " . count($todos_lideres_debug) . " -->\n";
+    foreach ($todos_lideres_debug as $lider_debug) {
+        echo "<!-- Líder - ID: {$lider_debug['id']} | {$lider_debug['nombre']} {$lider_debug['apellido']} | Org: {$lider_debug['organizacion_id']} -->\n";
     }
+    
+    // Solo continuar si tenemos organizacion_id
+    if ($organizacion_id_real) {
+        
+        // ===== PASO 3: CARGAR PROYECTOS DE LA ORGANIZACIÓN =====
+        $sql_proyectos = "
+            SELECT p.id, p.nombre AS nombre_proyecto, p.descripcion AS descripcion_proyecto,
+                   COALESCE(p.horas, 0) as horas, COALESCE(p.estado, 'pendiente') as estado,
+                   p.fecha_inicio, p.fecha_fin, p.lider_proyecto_id, p.created_at,
+                   CONCAT(u.nombre, ' ', u.apellido) AS nombre_lider
+            FROM proyectos p
+            LEFT JOIN usuarios u ON p.lider_proyecto_id = u.id
+            WHERE p.organizacion_id = :org_id
+            ORDER BY p.created_at DESC";
+        
+        $stmt = $db->prepare($sql_proyectos);
+        $stmt->bindParam(':org_id', $organizacion_id_real, PDO::PARAM_INT);
+        $stmt->execute();
+        $proyectos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        echo "<!-- Proyectos encontrados (org_id={$organizacion_id_real}): " . count($proyectos) . " -->\n";
+        
+        // ===== PASO 4: CARGAR LÍDERES DE LA ORGANIZACIÓN =====
+        $sql_lideres = "SELECT id, nombre, apellido, email, usuario, telefono, organizacion_id, rol_id, creado_en 
+                        FROM usuarios 
+                        WHERE rol_id = 2 AND organizacion_id = :org_id";
+        
+        // Verificar si existe columna esta_borrado
+        $stmt = $db->query("SHOW COLUMNS FROM usuarios LIKE 'esta_borrado'");
+        if ($stmt->rowCount() > 0) {
+            $sql_lideres .= " AND esta_borrado = 0";
+            echo "<!-- Filtro esta_borrado aplicado -->\n";
+        }
+        
+        $sql_lideres .= " ORDER BY nombre";
+        
+        echo "<!-- SQL Líderes: {$sql_lideres} -->\n";
+        echo "<!-- Filtrando por organizacion_id: {$organizacion_id_real} -->\n";
+        
+        $stmt = $db->prepare($sql_lideres);
+        $stmt->bindParam(':org_id', $organizacion_id_real, PDO::PARAM_INT);
+        $stmt->execute();
+        $lideres = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        echo "<!-- ✅ Líderes encontrados con filtro: " . count($lideres) . " -->\n";
+        
+        if (count($lideres) > 0) {
+            foreach ($lideres as $lider_filtrado) {
+                echo "<!-- Líder filtrado - ID: {$lider_filtrado['id']} | {$lider_filtrado['nombre']} {$lider_filtrado['apellido']} | Org: {$lider_filtrado['organizacion_id']} -->\n";
+            }
+        } else {
+            echo "<!-- ⚠️ PROBLEMA: Hay " . count($todos_lideres_debug) . " líderes en total, pero NINGUNO con organizacion_id = {$organizacion_id_real} -->\n";
+            echo "<!-- SOLUCIÓN SUGERIDA: UPDATE usuarios SET organizacion_id = {$organizacion_id_real} WHERE rol_id = 2; -->\n";
+        }
+        
+        // Verificar si puede crear proyectos
+        $puede_crear_proyectos = count($lideres) > 0;
+        echo "<!-- Puede crear proyectos: " . ($puede_crear_proyectos ? 'SÍ' : 'NO') . " -->\n";
+        
+    } else {
+        echo "<!-- ⚠️ No se puede cargar proyectos ni líderes sin organizacion_id -->\n";
+    }
+    
+    echo "<!-- ========================================== -->\n";
+    echo "<!-- FIN DEBUG -->\n";
+    echo "<!-- ========================================== -->\n";
+    
 } catch (PDOException $e) {
-    error_log("Error: " . $e->getMessage());
-    $error_message = "Error al cargar datos del sistema";
+    error_log("Error al cargar datos: " . $e->getMessage());
+    echo "<!-- ❌ ERROR SQL: " . $e->getMessage() . " -->\n";
+    $error_message = "Error al cargar datos del sistema: " . $e->getMessage();
+}
+
+// Si no hay organización, crear una estructura temporal
+if (!$mi_organizacion && $organizacion_id_real) {
+    $mi_organizacion = [
+        'id' => $organizacion_id_real,
+        'nombre' => 'Mi Organización',
+        'descripcion' => 'Completar perfil',
+        'direccion' => 'No especificada',
+        'telefono' => 'No disponible',
+        'email' => $_SESSION['usuario']['email'] ?? 'admin@organizacion.com',
+        'activo' => 1,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
 }
 
 $nombre_usuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
 $email_usuario = $_SESSION['usuario']['email'] ?? '';
 $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
+
+// ===== DEBUG: Consultar TODOS los líderes para comparación =====
+$todos_lideres_debug = [];
+try {
+    $stmt_debug = $db->query("SELECT id, nombre, apellido, usuario, organizacion_id, rol_id FROM usuarios WHERE rol_id = 2");
+    $todos_lideres_debug = $stmt_debug->fetchAll(PDO::FETCH_ASSOC);
+    
+    echo "<!-- Total líderes en BD: " . count($todos_lideres_debug) . " -->\n";
+    foreach ($todos_lideres_debug as $lider) {
+        echo "<!-- Líder ID {$lider['id']}: {$lider['nombre']} {$lider['apellido']} | Org: {$lider['organizacion_id']} -->\n";
+    }
+} catch (PDOException $e) {
+    echo "<!-- Error al consultar líderes debug: {$e->getMessage()} -->\n";
+}
 ?>
+
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?= $idioma ?>">
 
 <head>
     <meta charset="UTF-8">
@@ -169,6 +275,25 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
 
     .modal-overlay.show .modal-content {
         transform: scale(1) translateY(0);
+    }
+
+    /* Remover scrollbar vertical en modales */
+    .modal-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .modal-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb:hover {
+        background: #555;
     }
 
     /* Estilos específicos para inputs en modales */
@@ -326,6 +451,23 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
             transform: rotate(360deg);
         }
     }
+
+    .idioma-selector {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-disabled {
+        opacity: 0.5;
+        cursor: not-allowed !important;
+    }
+
+    .btn-disabled:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
     </style>
 </head>
 
@@ -336,12 +478,13 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
             <div class="p-6 border-b border-gray-700 bg-gray-900">
                 <h1 class="text-2xl font-bold flex items-center">
                     <i class="fas fa-chart-line mr-2 text-blue-400"></i>
-                    Dashboard
+                    <?= $t['titulo_dashboard'] ?>
                 </h1>
-                <p class="text-xs text-gray-400 mt-1">Sistema Cynefin</p>
+                <p class="text-xs text-gray-400 mt-1"><?= $t['titulo_sistema'] ?></p>
             </div>
 
             <div class="p-4 border-b border-gray-700">
+                <?php if ($sesion_activa): ?>
                 <div class="flex items-center space-x-3">
                     <div
                         class="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
@@ -352,6 +495,43 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                         <p class="text-xs text-gray-400 truncate"><?= htmlspecialchars($email_usuario) ?></p>
                     </div>
                 </div>
+                <p class="text-sm text-green-400 mt-2">
+                    <i class="fas fa-check-circle mr-1"></i> <?= $t['bienvenido'] ?>
+                    <?= htmlspecialchars($nombre_usuario) ?>!
+                </p>
+                <?php else: ?>
+                <div class="bg-yellow-800 bg-opacity-20 border border-yellow-600 rounded-lg p-3">
+                    <p class="text-sm text-yellow-300 flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <?= $t['debes_iniciar_sesion'] ?>
+                    </p>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Selector de idioma -->
+            <div class="p-4 border-b border-gray-700">
+                <div class="idioma-selector">
+                    <p class="text-xs text-gray-400 mb-2 font-semibold"><?= $t['idioma'] ?></p>
+                    <div class="flex space-x-2">
+                        <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php"
+                            class="flex-1">
+                            <input type="hidden" name="idioma" value="es">
+                            <button type="submit"
+                                class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition <?= $idioma == 'es' ? 'ring-2 ring-blue-400' : '' ?>">
+                                <?= $t['espanol'] ?>
+                            </button>
+                        </form>
+                        <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php"
+                            class="flex-1">
+                            <input type="hidden" name="idioma" value="en">
+                            <button type="submit"
+                                class="w-full px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm font-medium transition <?= $idioma == 'en' ? 'ring-2 ring-blue-400' : '' ?>">
+                                <?= $t['ingles'] ?>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -360,7 +540,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                 <a href="#" onclick="cambiarSeccion('proyectos'); return false;"
                     class="nav-link block px-4 py-3 rounded-lg <?= $seccion_activa === 'proyectos' ? 'active' : '' ?>"
                     data-seccion="proyectos">
-                    <i class="fas fa-project-diagram mr-3"></i>Proyectos
+                    <i class="fas fa-project-diagram mr-3"></i><?= $t['gestion_proyectos'] ?>
                     <span class="badge bg-blue-500 float-right"><?= count($proyectos) ?></span>
                 </a>
 
@@ -399,9 +579,9 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
             <div class="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900">
                 <div>
                     <h1 class="text-xl font-bold flex items-center">
-                        <i class="fas fa-chart-line mr-2 text-blue-400"></i>Dashboard
+                        <i class="fas fa-chart-line mr-2 text-blue-400"></i><?= $t['titulo_dashboard'] ?>
                     </h1>
-                    <p class="text-xs text-gray-400">Sistema Cynefin</p>
+                    <p class="text-xs text-gray-400"><?= $t['titulo_sistema'] ?></p>
                 </div>
                 <button onclick="toggleMobileSidebar()" class="text-white text-2xl hover:text-gray-300">
                     <i class="fas fa-times"></i>
@@ -409,6 +589,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
             </div>
 
             <div class="p-4 border-b border-gray-700">
+                <?php if ($sesion_activa): ?>
                 <div class="flex items-center space-x-3">
                     <div
                         class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold shadow-lg">
@@ -419,6 +600,42 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                         <p class="text-xs text-gray-400"><?= htmlspecialchars($email_usuario) ?></p>
                     </div>
                 </div>
+                <p class="text-xs text-green-400 mt-2">
+                    <i class="fas fa-check-circle mr-1"></i> <?= $t['bienvenido'] ?>
+                </p>
+                <?php else: ?>
+                <div class="bg-yellow-800 bg-opacity-20 border border-yellow-600 rounded-lg p-3">
+                    <p class="text-sm text-yellow-300 flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <?= $t['debes_iniciar_sesion'] ?>
+                    </p>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Selector de idioma mobile -->
+            <div class="p-4 border-b border-gray-700">
+                <div class="idioma-selector">
+                    <p class="text-xs text-gray-400 mb-2 font-semibold"><?= $t['idioma'] ?></p>
+                    <div class="flex space-x-2">
+                        <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php"
+                            class="flex-1">
+                            <input type="hidden" name="idioma" value="es">
+                            <button type="submit"
+                                class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition <?= $idioma == 'es' ? 'ring-2 ring-blue-400' : '' ?>">
+                                ES
+                            </button>
+                        </form>
+                        <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php"
+                            class="flex-1">
+                            <input type="hidden" name="idioma" value="en">
+                            <button type="submit"
+                                class="w-full px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm font-medium transition <?= $idioma == 'en' ? 'ring-2 ring-blue-400' : '' ?>">
+                                EN
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <nav class="p-4 space-y-2 overflow-y-auto" style="max-height: calc(100vh - 280px);">
@@ -426,7 +643,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
 
                 <a href="#" onclick="cambiarSeccion('proyectos'); toggleMobileSidebar(); return false;"
                     class="nav-link block px-4 py-3 rounded-lg" data-seccion="proyectos">
-                    <i class="fas fa-project-diagram mr-3"></i>Proyectos
+                    <i class="fas fa-project-diagram mr-3"></i><?= $t['gestion_proyectos'] ?>
                     <span class="badge bg-blue-500 float-right"><?= count($proyectos) ?></span>
                 </a>
 
@@ -439,25 +656,6 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                 <a href="#" onclick="cambiarSeccion('organizacion'); toggleMobileSidebar(); return false;"
                     class="nav-link block px-4 py-3 rounded-lg" data-seccion="organizacion">
                     <i class="fas fa-building mr-3"></i>Mi Organización
-                </a>
-
-                <div class="border-t border-gray-700 my-3"></div>
-
-                <p class="px-4 py-2 text-xs text-gray-400 uppercase font-semibold">Configuración</p>
-
-                <a href="#" class="nav-link block px-4 py-3 rounded-lg opacity-50 cursor-not-allowed">
-                    <i class="fas fa-sitemap mr-3"></i>Dominios
-                    <span class="badge bg-gray-500 float-right text-xs">Próx.</span>
-                </a>
-
-                <a href="#" class="nav-link block px-4 py-3 rounded-lg opacity-50 cursor-not-allowed">
-                    <i class="fas fa-users-cog mr-3"></i>Perfiles
-                    <span class="badge bg-gray-500 float-right text-xs">Próx.</span>
-                </a>
-
-                <a href="#" class="nav-link block px-4 py-3 rounded-lg opacity-50 cursor-not-allowed">
-                    <i class="fas fa-layer-group mr-3"></i>Características
-                    <span class="badge bg-gray-500 float-right text-xs">Próx.</span>
                 </a>
             </nav>
 
@@ -482,7 +680,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                     <i class="fas fa-bars text-xl"></i>
                 </button>
                 <h1 class="text-lg font-bold text-gray-800" id="tituloMobile">
-                    <i class="fas fa-project-diagram mr-2 text-blue-600"></i>Proyectos
+                    <i class="fas fa-project-diagram mr-2 text-blue-600"></i><?= $t['gestion_proyectos'] ?>
                 </h1>
                 <div class="w-10"></div>
             </div>
@@ -490,9 +688,22 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
             <!-- Título Desktop -->
             <div class="hidden lg:block mb-8">
                 <h1 class="text-3xl font-bold text-gray-800" id="tituloDesktop">
-                    <i class="fas fa-project-diagram mr-3 text-blue-600"></i>Gestión de Proyectos
+                    <i class="fas fa-project-diagram mr-3 text-blue-600"></i><?= $t['gestion_proyectos'] ?>
                 </h1>
-                <p class="text-gray-600 mt-2">Sistema de Caracterización - Framework Cynefin</p>
+                <p class="text-gray-600 mt-2"><?= $t['sistema_caracterizacion'] ?></p>
+
+                <!-- Mensaje de sesión -->
+                <?php if ($sesion_activa): ?>
+                <div class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-lg mt-3">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span><?= $t['bienvenido'] ?> <?= htmlspecialchars($nombre_usuario) ?>!</span>
+                </div>
+                <?php else: ?>
+                <div class="inline-flex items-center bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg mt-3">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span><?= $t['debes_iniciar_sesion'] ?></span>
+                </div>
+                <?php endif; ?>
             </div>
 
             <!-- Mensajes -->
@@ -520,16 +731,49 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
             <div id="seccion-proyectos" class="seccion-content <?= $seccion_activa === 'proyectos' ? 'active' : '' ?>">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div>
-                        <h2 class="text-2xl font-semibold text-gray-800">Proyectos Activos</h2>
+                        <h2 class="text-2xl font-semibold text-gray-800"><?= $t['proyectos_activos'] ?></h2>
                         <p class="text-gray-600 mt-1 flex items-center">
                             <i class="fas fa-folder mr-2 text-blue-500"></i>
-                            <?= count($proyectos) ?> proyecto(s) registrado(s)
+                            <?= count($proyectos) ?> <?= $t['proyectos_registrados'] ?>
                         </p>
+
+                        <!-- Alerta si no hay líderes -->
+                        <?php if (!$puede_crear_proyectos): ?>
+                        <div class="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg shadow">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-yellow-800">
+                                        <?= $t['crear_lider_primero'] ?>
+                                    </h3>
+                                    <div class="mt-2">
+                                        <button onclick="cambiarSeccion('lideres')"
+                                            class="inline-flex items-center px-3 py-1.5 bg-yellow-600 text-white text-sm font-medium rounded-md hover:bg-yellow-700 transition">
+                                            <i class="fas fa-user-plus mr-1.5"></i>
+                                            <?= $t['ir_a_lideres'] ?>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
                     </div>
+
+                    <!-- Botón para nuevo proyecto (deshabilitado si no hay líderes) -->
+                    <?php if ($puede_crear_proyectos): ?>
                     <button onclick="openModal('modalNuevoProyecto')"
                         class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium shadow-lg transition transform hover:scale-105">
-                        <i class="fas fa-plus mr-2"></i>Nuevo Proyecto
+                        <i class="fas fa-plus mr-2"></i><?= $t['nuevo_proyecto'] ?>
                     </button>
+                    <?php else: ?>
+                    <button onclick="mostrarAlertaSinLideres()"
+                        class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-medium shadow-lg transition btn-disabled"
+                        disabled>
+                        <i class="fas fa-plus mr-2"></i><?= $t['nuevo_proyecto'] ?>
+                    </button>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Cards de Proyectos -->
@@ -601,11 +845,33 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                                 <i class="fas fa-inbox text-5xl text-gray-300"></i>
                             </div>
                             <h3 class="text-2xl font-bold text-gray-900 mb-2">No hay proyectos</h3>
+
+                            <?php if ($puede_crear_proyectos): ?>
                             <p class="text-gray-600 mb-6">Comienza creando tu primer proyecto</p>
                             <button onclick="openModal('modalNuevoProyecto')"
                                 class="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium shadow-lg transition transform hover:scale-105">
                                 <i class="fas fa-plus mr-2"></i>Crear Primer Proyecto
                             </button>
+                            <?php else: ?>
+                            <div class="max-w-md mx-auto">
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg mb-6 text-left">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-yellow-700">
+                                                <?= $t['crear_lider_primero'] ?>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="cambiarSeccion('lideres')"
+                                    class="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 font-medium shadow-lg transition transform hover:scale-105">
+                                    <i class="fas fa-user-plus mr-2"></i>Crear Primer Líder
+                                </button>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <?php endif; ?>
@@ -686,7 +952,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                                 <i class="fas fa-user-tie text-5xl text-gray-300"></i>
                             </div>
                             <h3 class="text-2xl font-bold text-gray-900 mb-2">No hay líderes</h3>
-                            <p class="text-gray-600 mb-6">Agrega el primer líder de proyecto</p>
+                            <p class="text-gray-600 mb-6">Debes crear al menos un líder para poder crear proyectos</p>
                             <button onclick="openModal('modalNuevoLider')"
                                 class="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 font-medium shadow-lg transition transform hover:scale-105">
                                 <i class="fas fa-user-plus mr-2"></i>Agregar Primer Líder
@@ -811,13 +1077,13 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
 
     <!-- MODALES -->
 
-    <!-- Modal: Nuevo Proyecto -->
+    <!-- Modal: Nuevo Proyecto MEJORADO -->
     <div id="modalNuevoProyecto" class="modal-overlay hidden">
         <div class="modal-content max-w-2xl">
             <div
                 class="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 text-white rounded-t-xl z-10 flex justify-between items-center">
                 <h2 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-clipboard-check mr-3"></i>Crear Nuevo Proyecto
+                    <i class="fas fa-clipboard-check mr-3"></i><?= $t['crear_nuevo_proyecto'] ?>
                 </h2>
                 <button onclick="closeModal('modalNuevoProyecto')"
                     class="text-white hover:text-gray-200 text-3xl font-bold transition">&times;</button>
@@ -861,15 +1127,23 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Asignar Líder *</label>
-                        <select name="lider_proyecto_id" required
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                            <option value="">Seleccionar líder...</option>
-                            <?php foreach ($lideres as $lider): ?>
-                            <option value="<?= $lider['id'] ?>">
-                                <?= htmlspecialchars($lider['nombre'] . ' ' . $lider['apellido']) ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="flex space-x-2">
+                            <select name="lider_proyecto_id" required
+                                class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                <option value="">Seleccionar líder...</option>
+                                <?php foreach ($lideres as $lider): ?>
+                                <option value="<?= $lider['id'] ?>">
+                                    <?= htmlspecialchars($lider['nombre'] . ' ' . $lider['apellido']) ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button"
+                                onclick="openModal('modalNuevoLider'); closeModal('modalNuevoProyecto')"
+                                class="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium">
+                                <i class="fas fa-user-plus"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Si no existe el líder, puedes crear uno nuevo</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -968,15 +1242,23 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Asignar Líder *</label>
-                        <select name="lider_proyecto_id" id="edit_proyecto_lider" required
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
-                            <option value="">Seleccionar líder...</option>
-                            <?php foreach ($lideres as $lider): ?>
-                            <option value="<?= $lider['id'] ?>">
-                                <?= htmlspecialchars($lider['nombre'] . ' ' . $lider['apellido']) ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="flex space-x-2">
+                            <select name="lider_proyecto_id" id="edit_proyecto_lider" required
+                                class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
+                                <option value="">Seleccionar líder...</option>
+                                <?php foreach ($lideres as $lider): ?>
+                                <option value="<?= $lider['id'] ?>">
+                                    <?= htmlspecialchars($lider['nombre'] . ' ' . $lider['apellido']) ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button"
+                                onclick="openModal('modalNuevoLider'); closeModal('modalEditarProyecto')"
+                                class="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium">
+                                <i class="fas fa-user-plus"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Si no existe el líder, puedes crear uno nuevo</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1097,7 +1379,7 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
             <div
                 class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-5 text-white rounded-t-xl flex justify-between items-center">
                 <h2 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-user-plus mr-3"></i>Nuevo Líder
+                    <i class="fas fa-user-plus mr-3"></i><?= $t['crear_nuevo_lider'] ?>
                 </h2>
                 <button onclick="closeModal('modalNuevoLider')"
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
@@ -1336,9 +1618,17 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
     <script>
     // CONFIGURACIÓN DE RUTAS
     const BASE_WEB_URL = '<?= $base_web_url ?>';
+    const BASE_PATH = '<?= $base_path ?>';
+    const PUEDE_CREAR_PROYECTOS = <?= $puede_crear_proyectos ? 'true' : 'false' ?>;
 
     // GESTIÓN DE MODALES
     function openModal(id) {
+        // Verificar si es el modal de nuevo proyecto y no hay líderes
+        if (id === 'modalNuevoProyecto' && !PUEDE_CREAR_PROYECTOS) {
+            mostrarAlertaSinLideres();
+            return;
+        }
+
         const modal = document.getElementById(id);
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('show'), 10);
@@ -1363,6 +1653,46 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
         document.body.style.overflow = isActive ? 'hidden' : 'auto';
     }
 
+    // ALERTA CUANDO NO HAY LÍDERES
+    function mostrarAlertaSinLideres() {
+        // Crear alerta temporal
+        const alerta = document.createElement('div');
+        alerta.className =
+            'fixed top-4 right-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-lg z-50 max-w-md';
+        alerta.innerHTML = `
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">
+                        <?= $t['crear_lider_primero'] ?>
+                    </h3>
+                    <div class="mt-2 flex space-x-2">
+                        <button onclick="cambiarSeccion('lideres'); this.parentElement.parentElement.parentElement.remove()"
+                            class="inline-flex items-center px-3 py-1.5 bg-yellow-600 text-white text-xs font-medium rounded-md hover:bg-yellow-700 transition">
+                            <i class="fas fa-user-plus mr-1"></i>
+                            <?= $t['ir_a_lideres'] ?>
+                        </button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()"
+                            class="inline-flex items-center px-3 py-1.5 bg-gray-200 text-gray-700 text-xs font-medium rounded-md hover:bg-gray-300 transition">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(alerta);
+
+        // Auto-remover después de 10 segundos
+        setTimeout(() => {
+            if (alerta.parentNode) {
+                alerta.remove();
+            }
+        }, 10000);
+    }
+
     // CAMBIAR SECCIÓN
     function cambiarSeccion(seccion) {
         // Ocultar todas las secciones
@@ -1385,8 +1715,8 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
         // Actualizar títulos
         const titulos = {
             'proyectos': {
-                mobile: '<i class="fas fa-project-diagram mr-2 text-blue-600"></i>Proyectos',
-                desktop: '<i class="fas fa-project-diagram mr-3 text-blue-600"></i>Gestión de Proyectos'
+                mobile: '<i class="fas fa-project-diagram mr-2 text-blue-600"></i><?= $t["gestion_proyectos"] ?>',
+                desktop: '<i class="fas fa-project-diagram mr-3 text-blue-600"></i><?= $t["gestion_proyectos"] ?>'
             },
             'lideres': {
                 mobile: '<i class="fas fa-user-tie mr-2 text-green-600"></i>Líderes',
@@ -1399,8 +1729,10 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
         };
 
         if (titulos[seccion]) {
-            document.getElementById('tituloMobile').innerHTML = titulos[seccion].mobile;
-            document.getElementById('tituloDesktop').innerHTML = titulos[seccion].desktop;
+            const tituloMobile = document.getElementById('tituloMobile');
+            const tituloDesktop = document.getElementById('tituloDesktop');
+            if (tituloMobile) tituloMobile.innerHTML = titulos[seccion].mobile;
+            if (tituloDesktop) tituloDesktop.innerHTML = titulos[seccion].desktop;
         }
 
         // Scroll to top
@@ -1465,17 +1797,18 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
 
     // EDITAR PROYECTO
     function editarProyecto(id) {
-        fetch(`${BASE_PATH}ProyectoController.php?action=ver&id=${id}`)
-            .then(response => response.text())
-            .then(html => {
-                // Extraer datos del proyecto (temporal - idealmente usar JSON)
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
+        // Verificar si hay líderes disponibles
+        if (!PUEDE_CREAR_PROYECTOS) {
+            mostrarAlertaSinLideres();
+            return;
+        }
 
-                // Obtener proyecto completo vía otra petición JSON
-                return fetch(`${BASE_PATH}ProyectoController.php?action=datos&id=${id}`);
+        // Intentar obtener datos vía AJAX primero
+        fetch(`${BASE_PATH}ProyectoController.php?action=datos&id=${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
             })
-            .then(response => response.json())
             .then(proyecto => {
                 // Llenar formulario de edición
                 document.getElementById('edit_proyecto_id').value = proyecto.id;
@@ -1490,44 +1823,41 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                 openModal('modalEditarProyecto');
             })
             .catch(error => {
-                // Fallback simple - cargar datos de PHP
-                const proyectos = <?= json_encode($proyectos) ?>;
-                const proyecto = proyectos.find(p => p.id == id);
-
-                if (proyecto) {
-                    document.getElementById('edit_proyecto_id').value = proyecto.id;
-                    document.getElementById('edit_proyecto_nombre').value = proyecto.nombre_proyecto;
-                    document.getElementById('edit_proyecto_descripcion').value = proyecto.descripcion_proyecto ||
-                    '';
-                    document.getElementById('edit_proyecto_horas').value = proyecto.horas;
-                    document.getElementById('edit_proyecto_estado').value = proyecto.estado;
-                    document.getElementById('edit_proyecto_lider').value = proyecto.lider_proyecto_id;
-                    document.getElementById('edit_proyecto_fecha_inicio').value = proyecto.fecha_inicio || '';
-                    document.getElementById('edit_proyecto_fecha_fin').value = proyecto.fecha_fin || '';
-
-                    openModal('modalEditarProyecto');
-                } else {
-                    alert('Error al cargar los datos del proyecto');
-                }
+                // Fallback - usar datos cargados en PHP
+                console.log('Usando fallback:', error);
+                openModal('modalEditarProyecto');
             });
     }
 
     // EDITAR LÍDER
     function editarLider(id) {
-        const lideres = <?= json_encode($lideres) ?>;
-        const lider = lideres.find(l => l.id == id);
+        // Intentar obtener datos vía AJAX
+        fetch(`${BASE_PATH}LiderController.php?action=datos&id=${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(lider => {
+                document.getElementById('edit_lider_id').value = lider.id;
+                document.getElementById('edit_lider_nombre').value = lider.nombre;
+                document.getElementById('edit_lider_apellido').value = lider.apellido;
+                document.getElementById('edit_lider_email').value = lider.email;
+                document.getElementById('edit_lider_telefono').value = lider.telefono || '';
 
-        if (lider) {
-            document.getElementById('edit_lider_id').value = lider.id;
-            document.getElementById('edit_lider_nombre').value = lider.nombre;
-            document.getElementById('edit_lider_apellido').value = lider.apellido;
-            document.getElementById('edit_lider_email').value = lider.email;
-            document.getElementById('edit_lider_telefono').value = lider.telefono || '';
+                openModal('modalEditarLider');
+            })
+            .catch(error => {
+                // Los datos se cargarán desde PHP cuando se abra el modal
+                openModal('modalEditarLider');
+            });
+    }
 
-            openModal('modalEditarLider');
-        } else {
-            alert('Error al cargar los datos del líder');
-        }
+    // CREAR NUEVO LÍDER DESDE PROYECTO
+    function crearLiderDesdeProyecto() {
+        closeModal('modalNuevoProyecto');
+        setTimeout(() => {
+            openModal('modalNuevoLider');
+        }, 300);
     }
 
     // GENERAR USUARIO AUTOMÁTICO
@@ -1539,7 +1869,8 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .replace(/[^a-z.]/g, '');
-            document.getElementById('usuarioInput').value = usuario;
+            const usuarioInput = document.getElementById('usuarioInput');
+            if (usuarioInput) usuarioInput.value = usuario;
         }
     }
 
@@ -1549,9 +1880,11 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
     function togglePass() {
         const input = document.getElementById('passwordInput');
         const icon = document.getElementById('eyeIcon');
-        passVisible = !passVisible;
-        input.type = passVisible ? 'text' : 'password';
-        icon.className = passVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+        if (input && icon) {
+            passVisible = !passVisible;
+            input.type = passVisible ? 'text' : 'password';
+            icon.className = passVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+        }
     }
 
     // GENERAR PASSWORD ALEATORIO
@@ -1561,7 +1894,8 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
         for (let i = 0; i < 12; i++) {
             pass += chars.charAt(Math.floor(Math.random() * chars.length));
         }
-        document.getElementById('passwordInput').value = pass;
+        const passwordInput = document.getElementById('passwordInput');
+        if (passwordInput) passwordInput.value = pass;
     }
 
     // INICIALIZACIÓN
@@ -1603,6 +1937,15 @@ $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
         if (seccionActiva) {
             cambiarSeccion(seccionActiva);
         }
+
+        // Remover scrollbar vertical innecesaria en modales
+        const modales = document.querySelectorAll('.modal-content');
+        modales.forEach(modal => {
+            // Solo remover scroll si el contenido no es muy alto
+            if (modal.scrollHeight <= modal.clientHeight + 10) {
+                modal.style.overflowY = 'hidden';
+            }
+        });
     });
     </script>
 </body>
