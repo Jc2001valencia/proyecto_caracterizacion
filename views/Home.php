@@ -473,37 +473,55 @@ try {
 
 <body class="bg-gray-50">
     <div class="flex min-h-screen">
-        <!-- Sidebar Desktop -->
+        <!-- Sidebar Desktop - VERSIÓN CORREGIDA -->
         <aside class="hidden lg:flex lg:w-64 bg-gray-800 text-white flex-col fixed h-screen shadow-2xl">
+            <!-- Header -->
             <div class="p-6 border-b border-gray-700 bg-gray-900">
-                <h1 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-chart-line mr-2 text-blue-400"></i>
-                    <?= $t['titulo_dashboard'] ?>
-                </h1>
-                <p class="text-xs text-gray-400 mt-1"><?= $t['titulo_sistema'] ?></p>
+                <div class="flex items-center">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 shadow-lg">
+                        <i class="fas fa-chart-network text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold"><?= $t['titulo_dashboard'] ?? 'Dashboard' ?></h1>
+                        <p class="text-xs text-gray-400 mt-1"><?= $t['titulo_sistema'] ?? 'Marco Cynefin' ?></p>
+                    </div>
+                </div>
             </div>
 
+            <!-- Perfil de usuario -->
             <div class="p-4 border-b border-gray-700">
                 <?php if ($sesion_activa): ?>
                 <div class="flex items-center space-x-3">
-                    <div
-                        class="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
-                        <?= $inicial_usuario ?>
+                    <div class="relative">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-lg shadow-lg ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-800">
+                            <?= $inicial_usuario ?>
+                        </div>
+                        <?php if (isset($usuario_activo) && $usuario_activo): ?>
+                        <div
+                            class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800">
+                        </div>
+                        <?php endif; ?>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="font-medium truncate"><?= htmlspecialchars($nombre_usuario) ?></p>
-                        <p class="text-xs text-gray-400 truncate"><?= htmlspecialchars($email_usuario) ?></p>
+                        <p class="font-semibold truncate"><?= htmlspecialchars($nombre_usuario) ?></p>
+                        <p class="text-xs text-gray-300 truncate">Administrador</p>
+                        <p class="text-xs text-gray-400 truncate mt-1"><?= htmlspecialchars($email_usuario) ?></p>
                     </div>
                 </div>
-                <p class="text-sm text-green-400 mt-2">
-                    <i class="fas fa-check-circle mr-1"></i> <?= $t['bienvenido'] ?>
-                    <?= htmlspecialchars($nombre_usuario) ?>!
-                </p>
+                <div class="mt-3 bg-green-900/20 border border-green-800/50 rounded-lg p-2">
+                    <p class="text-xs text-green-300 flex items-center">
+                        <i class="fas fa-check-circle mr-2 text-green-400"></i>
+                        <?= $t['bienvenido'] ?? 'Bienvenido' ?>
+                        <?= htmlspecialchars(explode(' ', $nombre_usuario)[0]) ?>!
+                    </p>
+                </div>
                 <?php else: ?>
-                <div class="bg-yellow-800 bg-opacity-20 border border-yellow-600 rounded-lg p-3">
+                <div class="bg-yellow-900/20 border border-yellow-800/50 rounded-lg p-3">
                     <p class="text-sm text-yellow-300 flex items-center">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <?= $t['debes_iniciar_sesion'] ?>
+                        <i class="fas fa-exclamation-triangle mr-2 text-yellow-400"></i>
+                        <?= $t['debes_iniciar_sesion'] ?? 'Debes iniciar sesión' ?>
                     </p>
                 </div>
                 <?php endif; ?>
@@ -511,163 +529,226 @@ try {
 
             <!-- Selector de idioma -->
             <div class="p-4 border-b border-gray-700">
-                <div class="idioma-selector">
-                    <p class="text-xs text-gray-400 mb-2 font-semibold"><?= $t['idioma'] ?></p>
-                    <div class="flex space-x-2">
-                        <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php"
-                            class="flex-1">
-                            <input type="hidden" name="idioma" value="es">
-                            <button type="submit"
-                                class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition <?= $idioma == 'es' ? 'ring-2 ring-blue-400' : '' ?>">
-                                <?= $t['espanol'] ?>
-                            </button>
-                        </form>
-                        <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php"
-                            class="flex-1">
-                            <input type="hidden" name="idioma" value="en">
-                            <button type="submit"
-                                class="w-full px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm font-medium transition <?= $idioma == 'en' ? 'ring-2 ring-blue-400' : '' ?>">
-                                <?= $t['ingles'] ?>
-                            </button>
-                        </form>
-                    </div>
+                <p class="text-xs text-gray-400 mb-2 font-semibold uppercase tracking-wider">
+                    <?= $t['idioma'] ?? 'Idioma' ?></p>
+                <div class="flex space-x-2">
+                    <form method="POST" action="<?= $base_web_url ?? '' ?>/controllers/IdiomaController.php"
+                        class="flex-1">
+                        <input type="hidden" name="idioma" value="es">
+                        <button type="submit" class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center
+                    <?= ($idioma ?? 'es') == 'es' 
+                        ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600' ?>">
+                            <i class="fas fa-flag mr-2"></i> ES
+                        </button>
+                    </form>
+                    <form method="POST" action="<?= $base_web_url ?? '' ?>/controllers/IdiomaController.php"
+                        class="flex-1">
+                        <input type="hidden" name="idioma" value="en">
+                        <button type="submit" class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center
+                    <?= ($idioma ?? 'es') == 'en' 
+                        ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' 
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600' ?>">
+                            <i class="fas fa-flag-usa mr-2"></i> EN
+                        </button>
+                    </form>
                 </div>
             </div>
 
+            <!-- Navegación principal -->
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                <p class="px-4 py-2 text-xs text-gray-400 uppercase font-semibold tracking-wider">Gestión Principal</p>
+                <p class="px-4 py-2 text-xs text-gray-400 uppercase font-semibold tracking-wider mb-3">
+                    <i class="fas fa-sitemap mr-2"></i> Gestión Principal
+                </p>
 
-                <a href="#" onclick="cambiarSeccion('proyectos'); return false;"
-                    class="nav-link block px-4 py-3 rounded-lg <?= $seccion_activa === 'proyectos' ? 'active' : '' ?>"
-                    data-seccion="proyectos">
-                    <i class="fas fa-project-diagram mr-3"></i><?= $t['gestion_proyectos'] ?>
-                    <span class="badge bg-blue-500 float-right"><?= count($proyectos) ?></span>
+                <!-- Proyectos -->
+                <a href="#" onclick="cambiarSeccion('proyectos'); return false;" class="nav-link group flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
+            <?= ($seccion_activa ?? '') === 'proyectos' 
+                ? 'bg-blue-900/40 text-white border-l-4 border-blue-400' 
+                : 'hover:bg-gray-700/50 text-gray-300' ?>">
+                    <div class="flex items-center">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-blue-900/50 flex items-center justify-center mr-3 group-hover:bg-blue-800">
+                            <i class="fas fa-project-diagram text-blue-300"></i>
+                        </div>
+                        <span><?= $t['gestion_proyectos'] ?? 'Gestión de Proyectos' ?></span>
+                    </div>
+                    <?php if (isset($proyectos) && is_array($proyectos)): ?>
+                    <span class="badge bg-blue-500 px-2 py-1 rounded-full text-xs font-bold min-w-[24px] text-center">
+                        <?= count($proyectos) ?>
+                    </span>
+                    <?php else: ?>
+                    <span
+                        class="badge bg-gray-700 px-2 py-1 rounded-full text-xs font-bold min-w-[24px] text-center">0</span>
+                    <?php endif; ?>
                 </a>
 
-                <a href="#" onclick="cambiarSeccion('lideres'); return false;"
-                    class="nav-link block px-4 py-3 rounded-lg <?= $seccion_activa === 'lideres' ? 'active' : '' ?>"
-                    data-seccion="lideres">
-                    <i class="fas fa-user-tie mr-3"></i>Líderes
-                    <span class="badge bg-green-500 float-right"><?= count($lideres) ?></span>
+                <!-- Líderes -->
+                <a href="#" onclick="cambiarSeccion('lideres'); return false;" class="nav-link group flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
+            <?= ($seccion_activa ?? '') === 'lideres' 
+                ? 'bg-green-900/40 text-white border-l-4 border-green-400' 
+                : 'hover:bg-gray-700/50 text-gray-300' ?>">
+                    <div class="flex items-center">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-green-900/50 flex items-center justify-center mr-3 group-hover:bg-green-800">
+                            <i class="fas fa-user-tie text-green-300"></i>
+                        </div>
+                        <span>Líderes</span>
+                    </div>
+                    <?php if (isset($lideres) && is_array($lideres)): ?>
+                    <span class="badge bg-green-500 px-2 py-1 rounded-full text-xs font-bold min-w-[24px] text-center">
+                        <?= count($lideres) ?>
+                    </span>
+                    <?php else: ?>
+                    <span
+                        class="badge bg-gray-700 px-2 py-1 rounded-full text-xs font-bold min-w-[24px] text-center">0</span>
+                    <?php endif; ?>
                 </a>
 
-                <a href="#" onclick="cambiarSeccion('organizacion'); return false;"
-                    class="nav-link block px-4 py-3 rounded-lg <?= $seccion_activa === 'organizacion' ? 'active' : '' ?>"
-                    data-seccion="organizacion">
-                    <i class="fas fa-building mr-3"></i>Mi Organización
+                <!-- Organización -->
+                <a href="#" onclick="cambiarSeccion('organizacion'); return false;" class="nav-link group flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
+            <?= ($seccion_activa ?? '') === 'organizacion' 
+                ? 'bg-purple-900/40 text-white border-l-4 border-purple-400' 
+                : 'hover:bg-gray-700/50 text-gray-300' ?>">
+                    <div class="flex items-center">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-purple-900/50 flex items-center justify-center mr-3 group-hover:bg-purple-800">
+                            <i class="fas fa-building text-purple-300"></i>
+                        </div>
+                        <span>Mi Organización</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-gray-400"></i>
                 </a>
             </nav>
 
-            <div class="p-4 border-t border-gray-700 space-y-2">
+            <!-- Footer del sidebar -->
+            <div class="p-4 border-t border-gray-700 space-y-3 bg-gray-900/50">
+                <!-- Botón Ayuda -->
                 <button onclick="openModal('modalAyuda')"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition">
-                    <i class="fas fa-question-circle mr-2"></i>Ayuda
+                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <i class="fas fa-question-circle mr-2 text-lg"></i>
+                    <span>Ayuda & Soporte</span>
                 </button>
+
+                <!-- Botón Cerrar Sesión -->
                 <button onclick="openModal('modalLogout')"
-                    class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg font-medium transition">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+                    class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl">
+                    <i class="fas fa-sign-out-alt mr-2 text-lg"></i>
+                    <span>Cerrar Sesión</span>
                 </button>
+
+                <!-- Versión del sistema -->
+                <div class="pt-2 text-center">
+                    <p class="text-xs text-gray-500">v1.0.0 • © 2024 Cynefin</p>
+                </div>
             </div>
         </aside>
 
-        <!-- Sidebar Mobile -->
+        <!-- Sidebar Mobile - VERSIÓN CORREGIDA -->
         <div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30 hidden"
             onclick="toggleMobileSidebar()"></div>
 
         <aside id="mobileSidebar"
-            class="sidebar-mobile lg:hidden w-64 bg-gray-800 text-white fixed h-screen z-40 shadow-2xl">
-            <div class="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900">
-                <div>
-                    <h1 class="text-xl font-bold flex items-center">
-                        <i class="fas fa-chart-line mr-2 text-blue-400"></i><?= $t['titulo_dashboard'] ?>
-                    </h1>
-                    <p class="text-xs text-gray-400"><?= $t['titulo_sistema'] ?></p>
-                </div>
-                <button onclick="toggleMobileSidebar()" class="text-white text-2xl hover:text-gray-300">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="p-4 border-b border-gray-700">
-                <?php if ($sesion_activa): ?>
-                <div class="flex items-center space-x-3">
-                    <div
-                        class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold shadow-lg">
-                        <?= $inicial_usuario ?>
+            class="lg:hidden w-72 bg-gray-800 text-white fixed h-screen z-40 shadow-2xl transform -translate-x-full transition-transform duration-300">
+            <!-- Header Mobile -->
+            <div class="p-5 border-b border-gray-700 bg-gradient-to-r from-gray-900 to-gray-800">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <div
+                            class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 shadow-lg">
+                            <i class="fas fa-chart-network text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-bold"><?= $t['titulo_dashboard'] ?? 'Dashboard' ?></h1>
+                            <p class="text-xs text-gray-400">Sistema Cynefin</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="font-medium"><?= htmlspecialchars($nombre_usuario) ?></p>
-                        <p class="text-xs text-gray-400"><?= htmlspecialchars($email_usuario) ?></p>
-                    </div>
-                </div>
-                <p class="text-xs text-green-400 mt-2">
-                    <i class="fas fa-check-circle mr-1"></i> <?= $t['bienvenido'] ?>
-                </p>
-                <?php else: ?>
-                <div class="bg-yellow-800 bg-opacity-20 border border-yellow-600 rounded-lg p-3">
-                    <p class="text-sm text-yellow-300 flex items-center">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <?= $t['debes_iniciar_sesion'] ?>
-                    </p>
-                </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Selector de idioma mobile -->
-            <div class="p-4 border-b border-gray-700">
-                <div class="idioma-selector">
-                    <p class="text-xs text-gray-400 mb-2 font-semibold"><?= $t['idioma'] ?></p>
-                    <div class="flex space-x-2">
-                        <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php"
-                            class="flex-1">
-                            <input type="hidden" name="idioma" value="es">
-                            <button type="submit"
-                                class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition <?= $idioma == 'es' ? 'ring-2 ring-blue-400' : '' ?>">
-                                ES
-                            </button>
-                        </form>
-                        <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php"
-                            class="flex-1">
-                            <input type="hidden" name="idioma" value="en">
-                            <button type="submit"
-                                class="w-full px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm font-medium transition <?= $idioma == 'en' ? 'ring-2 ring-blue-400' : '' ?>">
-                                EN
-                            </button>
-                        </form>
-                    </div>
+                    <button onclick="toggleMobileSidebar()"
+                        class="w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-xl transition-colors">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
 
-            <nav class="p-4 space-y-2 overflow-y-auto" style="max-height: calc(100vh - 280px);">
-                <p class="px-4 py-2 text-xs text-gray-400 uppercase font-semibold">Gestión Principal</p>
+            <!-- Contenido Mobile -->
+            <div class="overflow-y-auto" style="max-height: calc(100vh - 140px);">
+                <!-- Perfil Mobile -->
+                <div class="p-4 border-b border-gray-700">
+                    <?php if ($sesion_activa): ?>
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="relative">
+                            <div
+                                class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-xl shadow-lg ring-2 ring-blue-400">
+                                <?= $inicial_usuario ?>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-lg"><?= htmlspecialchars($nombre_usuario) ?></p>
+                            <p class="text-sm text-gray-300">Administrador</p>
+                            <p class="text-xs text-gray-400 mt-1"><?= htmlspecialchars($email_usuario) ?></p>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
 
-                <a href="#" onclick="cambiarSeccion('proyectos'); toggleMobileSidebar(); return false;"
-                    class="nav-link block px-4 py-3 rounded-lg" data-seccion="proyectos">
-                    <i class="fas fa-project-diagram mr-3"></i><?= $t['gestion_proyectos'] ?>
-                    <span class="badge bg-blue-500 float-right"><?= count($proyectos) ?></span>
-                </a>
+                <!-- Navegación Mobile -->
+                <nav class="p-4 space-y-1">
+                    <!-- Proyectos Mobile -->
+                    <a href="#" onclick="cambiarSeccion('proyectos'); toggleMobileSidebar(); return false;"
+                        class="flex items-center justify-between px-4 py-3 rounded-lg bg-gray-700/50">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-lg bg-blue-900/50 flex items-center justify-center mr-3">
+                                <i class="fas fa-project-diagram text-blue-300"></i>
+                            </div>
+                            <span>Proyectos</span>
+                        </div>
+                        <span class="badge bg-blue-500 px-2 py-1 rounded-full text-xs font-bold">
+                            <?= isset($proyectos) && is_array($proyectos) ? count($proyectos) : '0' ?>
+                        </span>
+                    </a>
 
-                <a href="#" onclick="cambiarSeccion('lideres'); toggleMobileSidebar(); return false;"
-                    class="nav-link block px-4 py-3 rounded-lg" data-seccion="lideres">
-                    <i class="fas fa-user-tie mr-3"></i>Líderes
-                    <span class="badge bg-green-500 float-right"><?= count($lideres) ?></span>
-                </a>
+                    <!-- Líderes Mobile -->
+                    <a href="#" onclick="cambiarSeccion('lideres'); toggleMobileSidebar(); return false;"
+                        class="flex items-center justify-between px-4 py-3 rounded-lg bg-gray-700/50">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-lg bg-green-900/50 flex items-center justify-center mr-3">
+                                <i class="fas fa-user-tie text-green-300"></i>
+                            </div>
+                            <span>Líderes</span>
+                        </div>
+                        <span class="badge bg-green-500 px-2 py-1 rounded-full text-xs font-bold">
+                            <?= isset($lideres) && is_array($lideres) ? count($lideres) : '0' ?>
+                        </span>
+                    </a>
 
-                <a href="#" onclick="cambiarSeccion('organizacion'); toggleMobileSidebar(); return false;"
-                    class="nav-link block px-4 py-3 rounded-lg" data-seccion="organizacion">
-                    <i class="fas fa-building mr-3"></i>Mi Organización
-                </a>
-            </nav>
+                    <!-- Organización Mobile -->
+                    <a href="#" onclick="cambiarSeccion('organizacion'); toggleMobileSidebar(); return false;"
+                        class="flex items-center justify-between px-4 py-3 rounded-lg bg-gray-700/50">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-lg bg-purple-900/50 flex items-center justify-center mr-3">
+                                <i class="fas fa-building text-purple-300"></i>
+                            </div>
+                            <span>Mi Organización</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                </nav>
+            </div>
 
-            <div class="p-4 border-t border-gray-700 space-y-2 absolute bottom-0 left-0 right-0 bg-gray-800">
-                <button onclick="openModal('modalAyuda'); toggleMobileSidebar();"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium transition">
-                    <i class="fas fa-question-circle mr-2"></i>Ayuda
-                </button>
-                <button onclick="openModal('modalLogout'); toggleMobileSidebar();"
-                    class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg font-medium transition">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
-                </button>
+            <!-- Footer Mobile -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700 bg-gray-900/80">
+                <div class="flex space-x-2">
+                    <button onclick="openModal('modalAyuda'); toggleMobileSidebar();"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2.5 rounded-lg font-medium flex items-center justify-center">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        <span class="text-sm">Ayuda</span>
+                    </button>
+                    <button onclick="openModal('modalLogout'); toggleMobileSidebar();"
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2.5 rounded-lg font-medium flex items-center justify-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        <span class="text-sm">Salir</span>
+                    </button>
+                </div>
             </div>
         </aside>
 
