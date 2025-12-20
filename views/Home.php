@@ -30,40 +30,114 @@ $textos = [
     'es' => [
         'titulo_sistema' => 'Marco Cynefin',
         'titulo_dashboard' => 'Dashboard',
-        'gestion_proyectos' => 'Gestión de Proyectos',
-        'sistema_caracterizacion' => 'Sistema de Caracterización - Framework Cynefin',
-        'bienvenido' => '¡Bienvenido Administrador',
+        'gestion_proyectos' => 'Gestión de proyectos',
+        'sistema_caracterizacion' => 'Sistema de caracterización - Framework Cynefin',
+        'bienvenido' => '¡Bienvenido administrador',
         'debes_iniciar_sesion' => 'Debes iniciar sesión primero',
-        'proyectos_activos' => 'Proyectos Activos',
+        'proyectos_activos' => 'Proyectos activos',
         'proyectos_registrados' => 'proyecto(s) registrado(s)',
-        'nuevo_proyecto' => 'Nuevo Proyecto',
-        'crear_nuevo_proyecto' => 'Crear Nuevo Proyecto',
-        'crear_nuevo_lider' => 'Crear Nuevo Líder',
+        'nuevo_proyecto' => 'Nuevo proyecto',
+        'crear_nuevo_proyecto' => 'Crear nuevo proyecto',
+        'crear_nuevo_lider' => 'Crear nuevo líder',
         'idioma' => 'Idioma',
         'espanol' => 'Español',
         'ingles' => 'Inglés',
         'sin_lideres' => 'No hay líderes disponibles',
         'crear_lider_primero' => 'Debes crear al menos un líder antes de crear proyectos',
-        'ir_a_lideres' => 'Ir a Líderes'
+        'ir_a_lideres' => 'Ir a líderes',
+        'lideres_proyecto' => 'Líderes de proyecto',
+        'lideres_activos' => 'líder(es) activo(s)',
+        'informacion_organizacion' => 'Información de la organización',
+        'configuracion' => 'Configuración',
+        'editar_informacion' => 'Editar información',
+        'detalles_proyecto' => 'Detalles del proyecto',
+        'editar_proyecto' => 'Editar proyecto',
+        'detalles_lider' => 'Detalles del líder',
+        'editar_lider' => 'Editar líder',
+        'guia_sistema' => 'Guía del sistema',
+        'cerrar_sesion' => 'Cerrar sesión',
+        'funcionalidades' => 'Funcionalidades',
+        'nombre_proyecto' => 'Nombre del proyecto',
+        'descripcion' => 'Descripción',
+        'horas_estimadas' => 'Horas estimadas',
+        'estado' => 'Estado',
+        'asignar_lider' => 'Asignar líder',
+        'fecha_inicio' => 'Fecha inicio',
+        'fecha_fin_estimada' => 'Fecha fin estimada',
+        'cancelar' => 'Cancelar',
+        'guardar_cambios' => 'Guardar cambios',
+        'crear_proyecto' => 'Crear proyecto',
+        'nombre' => 'Nombre',
+        'apellido' => 'Apellido',
+        'email' => 'Email',
+        'telefono' => 'Teléfono',
+        'cambiar_contrasena' => 'Cambiar contraseña',
+        'nueva_contrasena' => 'Nueva contraseña',
+        'credenciales_acceso' => 'Credenciales de acceso',
+        'usuario' => 'Usuario',
+        'contrasena' => 'Contraseña',
+        'crear_lider' => 'Crear líder',
+        'direccion' => 'Dirección',
+        'registro' => 'Registro',
+        'ayuda_soporte' => 'Ayuda & soporte',
+        'cerrar_sesion_text' => 'Cerrar sesión',
+        'version_sistema' => 'v1.0.0 • © 2024 Cynefin'
     ],
     'en' => [
         'titulo_sistema' => 'Cynefin Framework',
         'titulo_dashboard' => 'Dashboard',
-        'gestion_proyectos' => 'Project Management',
-        'sistema_caracterizacion' => 'Characterization System - Cynefin Framework',
-        'bienvenido' => 'Welcome Administrator',
+        'gestion_proyectos' => 'Project management',
+        'sistema_caracterizacion' => 'Characterization system - Cynefin Framework',
+        'bienvenido' => 'Welcome administrator',
         'debes_iniciar_sesion' => 'You must login first',
-        'proyectos_activos' => 'Active Projects',
+        'proyectos_activos' => 'Active projects',
         'proyectos_registrados' => 'project(s) registered',
-        'nuevo_proyecto' => 'New Project',
-        'crear_nuevo_proyecto' => 'Create New Project',
-        'crear_nuevo_lider' => 'Create New Leader',
+        'nuevo_proyecto' => 'New project',
+        'crear_nuevo_proyecto' => 'Create new project',
+        'crear_nuevo_lider' => 'Create new leader',
         'idioma' => 'Language',
         'espanol' => 'Spanish',
         'ingles' => 'English',
         'sin_lideres' => 'No leaders available',
         'crear_lider_primero' => 'You must create at least one leader before creating projects',
-        'ir_a_lideres' => 'Go to Leaders'
+        'ir_a_lideres' => 'Go to leaders',
+        'lideres_proyecto' => 'Project leaders',
+        'lideres_activos' => 'leader(s) active',
+        'informacion_organizacion' => 'Organization information',
+        'configuracion' => 'Configuration',
+        'editar_informacion' => 'Edit information',
+        'detalles_proyecto' => 'Project details',
+        'editar_proyecto' => 'Edit project',
+        'detalles_lider' => 'Leader details',
+        'editar_lider' => 'Edit leader',
+        'guia_sistema' => 'System guide',
+        'cerrar_sesion' => 'Logout',
+        'funcionalidades' => 'Features',
+        'nombre_proyecto' => 'Project name',
+        'descripcion' => 'Description',
+        'horas_estimadas' => 'Estimated hours',
+        'estado' => 'Status',
+        'asignar_lider' => 'Assign leader',
+        'fecha_inicio' => 'Start date',
+        'fecha_fin_estimada' => 'Estimated end date',
+        'cancelar' => 'Cancel',
+        'guardar_cambios' => 'Save changes',
+        'crear_proyecto' => 'Create project',
+        'nombre' => 'First name',
+        'apellido' => 'Last name',
+        'email' => 'Email',
+        'telefono' => 'Phone',
+        'cambiar_contrasena' => 'Change password',
+        'nueva_contrasena' => 'New password',
+        'credenciales_acceso' => 'Access credentials',
+        'usuario' => 'Username',
+        'contrasena' => 'Password',
+        'crear_lider' => 'Create leader',
+        'direccion' => 'Address',
+        'registro' => 'Registration',
+        'ayuda_soporte' => 'Help & support',
+        'cerrar_sesion_text' => 'Logout',
+        'version_sistema' => 'v1.0.0 • © 2024 Cynefin'
     ]
 ];
 
@@ -72,7 +146,7 @@ $t = $textos[$idioma] ?? $textos['es'];
 // 4. VARIABLES
 $proyectos = $lideres = [];
 $mi_organizacion = null;
-$organizacion_id_real = null; // ← VARIABLE CLAVE: organizacion_id obtenida de la BD
+$organizacion_id_real = null;
 $error_message = $_SESSION['error'] ?? null;
 $success_message = $_SESSION['success'] ?? null;
 unset($_SESSION['error'], $_SESSION['success']);
@@ -80,51 +154,30 @@ unset($_SESSION['error'], $_SESSION['success']);
 $seccion_activa = $_GET['seccion'] ?? 'proyectos';
 $puede_crear_proyectos = false;
 
-// 5. OBTENER ORGANIZACIÓN DEL USUARIO DIRECTAMENTE DESDE LA BD
+// 5. OBTENER ORGANIZACIÓN DEL USUARIO
 try {
     $usuario_id = $_SESSION['usuario']['id'] ?? 0;
     
-    echo "<!-- ========================================== -->\n";
-    echo "<!-- DEBUG MEJORADO - CARGA DE DATOS -->\n";
-    echo "<!-- ========================================== -->\n";
-    echo "<!-- Usuario ID de sesión: {$usuario_id} -->\n";
-    
     if ($usuario_id > 0) {
-        // ===== PASO 1: CONSULTAR organizacion_id DEL USUARIO DESDE LA BD =====
+        // Obtener organización del usuario
         $stmt = $db->prepare("SELECT organizacion_id FROM usuarios WHERE id = ? LIMIT 1");
         $stmt->execute([$usuario_id]);
         $usuario_data = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        echo "<!-- Usuario encontrado en BD: " . ($usuario_data ? 'SÍ' : 'NO') . " -->\n";
-        
         if ($usuario_data && isset($usuario_data['organizacion_id'])) {
             $organizacion_id_real = $usuario_data['organizacion_id'];
-            echo "<!-- ✅ Organización ID obtenida desde BD: {$organizacion_id_real} -->\n";
             
-            // ===== PASO 2: CARGAR DATOS COMPLETOS DE LA ORGANIZACIÓN =====
+            // Cargar datos de la organización
             $stmt = $db->prepare("SELECT * FROM organizaciones WHERE id = ? LIMIT 1");
             $stmt->execute([$organizacion_id_real]);
             $mi_organizacion = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            echo "<!-- Organización cargada: " . ($mi_organizacion ? $mi_organizacion['nombre'] : 'NO ENCONTRADA') . " -->\n";
-        } else {
-            echo "<!-- ❌ PROBLEMA: Usuario NO tiene organizacion_id en la BD -->\n";
-            $error_message = "Tu usuario no tiene una organización asignada. Por favor, ejecuta el siguiente SQL en phpMyAdmin:<br><code>UPDATE usuarios SET organizacion_id = 8 WHERE id = {$usuario_id};</code>";
         }
-    }
-    
-    // ===== CONSULTA DEBUG: VER TODOS LOS LÍDERES SIN FILTRO =====
-    $stmt_debug = $db->query("SELECT id, nombre, apellido, usuario, organizacion_id, rol_id FROM usuarios WHERE rol_id = 2");
-    $todos_lideres_debug = $stmt_debug->fetchAll(PDO::FETCH_ASSOC);
-    echo "<!-- Total líderes en BD (rol_id=2): " . count($todos_lideres_debug) . " -->\n";
-    foreach ($todos_lideres_debug as $lider_debug) {
-        echo "<!-- Líder - ID: {$lider_debug['id']} | {$lider_debug['nombre']} {$lider_debug['apellido']} | Org: {$lider_debug['organizacion_id']} -->\n";
     }
     
     // Solo continuar si tenemos organizacion_id
     if ($organizacion_id_real) {
         
-        // ===== PASO 3: CARGAR PROYECTOS DE LA ORGANIZACIÓN =====
+        // Cargar proyectos de la organización
         $sql_proyectos = "
             SELECT p.id, p.nombre AS nombre_proyecto, p.descripcion AS descripcion_proyecto,
                    COALESCE(p.horas, 0) as horas, COALESCE(p.estado, 'pendiente') as estado,
@@ -140,56 +193,22 @@ try {
         $stmt->execute();
         $proyectos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        echo "<!-- Proyectos encontrados (org_id={$organizacion_id_real}): " . count($proyectos) . " -->\n";
-        
-        // ===== PASO 4: CARGAR LÍDERES DE LA ORGANIZACIÓN =====
+        // Cargar líderes de la organización
         $sql_lideres = "SELECT id, nombre, apellido, email, usuario, telefono, organizacion_id, rol_id, creado_en 
                         FROM usuarios 
                         WHERE rol_id = 2 AND organizacion_id = :org_id";
-        
-        // Verificar si existe columna esta_borrado
-        $stmt = $db->query("SHOW COLUMNS FROM usuarios LIKE 'esta_borrado'");
-        if ($stmt->rowCount() > 0) {
-            $sql_lideres .= " AND esta_borrado = 0";
-            echo "<!-- Filtro esta_borrado aplicado -->\n";
-        }
-        
-        $sql_lideres .= " ORDER BY nombre";
-        
-        echo "<!-- SQL Líderes: {$sql_lideres} -->\n";
-        echo "<!-- Filtrando por organizacion_id: {$organizacion_id_real} -->\n";
         
         $stmt = $db->prepare($sql_lideres);
         $stmt->bindParam(':org_id', $organizacion_id_real, PDO::PARAM_INT);
         $stmt->execute();
         $lideres = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        echo "<!-- ✅ Líderes encontrados con filtro: " . count($lideres) . " -->\n";
-        
-        if (count($lideres) > 0) {
-            foreach ($lideres as $lider_filtrado) {
-                echo "<!-- Líder filtrado - ID: {$lider_filtrado['id']} | {$lider_filtrado['nombre']} {$lider_filtrado['apellido']} | Org: {$lider_filtrado['organizacion_id']} -->\n";
-            }
-        } else {
-            echo "<!-- ⚠️ PROBLEMA: Hay " . count($todos_lideres_debug) . " líderes en total, pero NINGUNO con organizacion_id = {$organizacion_id_real} -->\n";
-            echo "<!-- SOLUCIÓN SUGERIDA: UPDATE usuarios SET organizacion_id = {$organizacion_id_real} WHERE rol_id = 2; -->\n";
-        }
-        
         // Verificar si puede crear proyectos
         $puede_crear_proyectos = count($lideres) > 0;
-        echo "<!-- Puede crear proyectos: " . ($puede_crear_proyectos ? 'SÍ' : 'NO') . " -->\n";
-        
-    } else {
-        echo "<!-- ⚠️ No se puede cargar proyectos ni líderes sin organizacion_id -->\n";
     }
-    
-    echo "<!-- ========================================== -->\n";
-    echo "<!-- FIN DEBUG -->\n";
-    echo "<!-- ========================================== -->\n";
     
 } catch (PDOException $e) {
     error_log("Error al cargar datos: " . $e->getMessage());
-    echo "<!-- ❌ ERROR SQL: " . $e->getMessage() . " -->\n";
     $error_message = "Error al cargar datos del sistema: " . $e->getMessage();
 }
 
@@ -197,7 +216,7 @@ try {
 if (!$mi_organizacion && $organizacion_id_real) {
     $mi_organizacion = [
         'id' => $organizacion_id_real,
-        'nombre' => 'Mi Organización',
+        'nombre' => 'Mi organización',
         'descripcion' => 'Completar perfil',
         'direccion' => 'No especificada',
         'telefono' => 'No disponible',
@@ -210,20 +229,6 @@ if (!$mi_organizacion && $organizacion_id_real) {
 $nombre_usuario = $_SESSION['usuario']['nombre'] ?? 'Usuario';
 $email_usuario = $_SESSION['usuario']['email'] ?? '';
 $inicial_usuario = strtoupper(substr($nombre_usuario, 0, 1));
-
-// ===== DEBUG: Consultar TODOS los líderes para comparación =====
-$todos_lideres_debug = [];
-try {
-    $stmt_debug = $db->query("SELECT id, nombre, apellido, usuario, organizacion_id, rol_id FROM usuarios WHERE rol_id = 2");
-    $todos_lideres_debug = $stmt_debug->fetchAll(PDO::FETCH_ASSOC);
-    
-    echo "<!-- Total líderes en BD: " . count($todos_lideres_debug) . " -->\n";
-    foreach ($todos_lideres_debug as $lider) {
-        echo "<!-- Líder ID {$lider['id']}: {$lider['nombre']} {$lider['apellido']} | Org: {$lider['organizacion_id']} -->\n";
-    }
-} catch (PDOException $e) {
-    echo "<!-- Error al consultar líderes debug: {$e->getMessage()} -->\n";
-}
 ?>
 
 <!DOCTYPE html>
@@ -232,15 +237,10 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Sistema de Caracterización</title>
+    <title>Dashboard - Sistema de caracterización</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-    /* Reset de estilos para modales */
-    .modal-overlay * {
-        box-sizing: border-box;
-    }
-
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -277,91 +277,6 @@ try {
         transform: scale(1) translateY(0);
     }
 
-    /* Remover scrollbar vertical en modales */
-    .modal-content::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .modal-content::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
-
-    .modal-content::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 4px;
-    }
-
-    .modal-content::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-
-    /* Estilos específicos para inputs en modales */
-    .modal-content input[type="text"],
-    .modal-content input[type="email"],
-    .modal-content input[type="tel"],
-    .modal-content input[type="number"],
-    .modal-content input[type="date"],
-    .modal-content input[type="password"],
-    .modal-content select,
-    .modal-content textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #d1d5db;
-        border-radius: 0.5rem;
-        font-size: 1rem;
-        transition: all 0.2s;
-        background: white;
-    }
-
-    .modal-content input:focus,
-    .modal-content select:focus,
-    .modal-content textarea:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .modal-content label {
-        display: block;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
-    }
-
-    .modal-content button[type="submit"] {
-        background: linear-gradient(to right, #3b82f6, #2563eb);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .modal-content button[type="submit"]:hover {
-        background: linear-gradient(to right, #2563eb, #1d4ed8);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
-
-    .modal-content button[type="button"] {
-        background: #e5e7eb;
-        color: #374151;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .modal-content button[type="button"]:hover {
-        background: #d1d5db;
-    }
-
     .sidebar-mobile {
         transform: translateX(-100%);
         transition: transform 0.3s ease-in-out;
@@ -369,19 +284,6 @@ try {
 
     .sidebar-mobile.active {
         transform: translateX(0);
-    }
-
-    .nav-link {
-        transition: all 0.2s ease;
-    }
-
-    .nav-link.active {
-        background-color: #374151;
-        border-left: 4px solid #3b82f6;
-    }
-
-    .nav-link:hover {
-        transform: translateX(4px);
     }
 
     .seccion-content {
@@ -411,26 +313,7 @@ try {
 
     .card-hover:hover {
         transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
-
-    .badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 1.5rem;
-        height: 1.5rem;
-        padding: 0 0.5rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    @media (max-width: 768px) {
-        .modal-content {
-            max-height: 95vh;
-            border-radius: 0.5rem;
-        }
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
 
     .loading-spinner {
@@ -452,13 +335,6 @@ try {
         }
     }
 
-    .idioma-selector {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 0.5rem;
-        padding: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
     .btn-disabled {
         opacity: 0.5;
         cursor: not-allowed !important;
@@ -473,7 +349,7 @@ try {
 
 <body class="bg-gray-50">
     <div class="flex min-h-screen">
-        <!-- Sidebar Desktop - VERSIÓN CORREGIDA -->
+        <!-- Sidebar Desktop -->
         <aside class="hidden lg:flex lg:w-64 bg-gray-800 text-white flex-col fixed h-screen shadow-2xl">
             <!-- Header -->
             <div class="p-6 border-b border-gray-700 bg-gray-900">
@@ -483,8 +359,8 @@ try {
                         <i class="fas fa-chart-network text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold"><?= $t['titulo_dashboard'] ?? 'Dashboard' ?></h1>
-                        <p class="text-xs text-gray-400 mt-1"><?= $t['titulo_sistema'] ?? 'Marco Cynefin' ?></p>
+                        <h1 class="text-xl font-bold"><?= $t['titulo_dashboard'] ?></h1>
+                        <p class="text-xs text-gray-400 mt-1"><?= $t['titulo_sistema'] ?></p>
                     </div>
                 </div>
             </div>
@@ -498,11 +374,6 @@ try {
                             class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center font-bold text-lg shadow-lg ring-2 ring-blue-400 ring-offset-2 ring-offset-gray-800">
                             <?= $inicial_usuario ?>
                         </div>
-                        <?php if (isset($usuario_activo) && $usuario_activo): ?>
-                        <div
-                            class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800">
-                        </div>
-                        <?php endif; ?>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="font-semibold truncate"><?= htmlspecialchars($nombre_usuario) ?></p>
@@ -513,15 +384,7 @@ try {
                 <div class="mt-3 bg-green-900/20 border border-green-800/50 rounded-lg p-2">
                     <p class="text-xs text-green-300 flex items-center">
                         <i class="fas fa-check-circle mr-2 text-green-400"></i>
-                        <?= $t['bienvenido'] ?? 'Bienvenido' ?>
-                        <?= htmlspecialchars(explode(' ', $nombre_usuario)[0]) ?>!
-                    </p>
-                </div>
-                <?php else: ?>
-                <div class="bg-yellow-900/20 border border-yellow-800/50 rounded-lg p-3">
-                    <p class="text-sm text-yellow-300 flex items-center">
-                        <i class="fas fa-exclamation-triangle mr-2 text-yellow-400"></i>
-                        <?= $t['debes_iniciar_sesion'] ?? 'Debes iniciar sesión' ?>
+                        <?= $t['bienvenido'] ?> <?= htmlspecialchars(explode(' ', $nombre_usuario)[0]) ?>!
                     </p>
                 </div>
                 <?php endif; ?>
@@ -529,26 +392,23 @@ try {
 
             <!-- Selector de idioma -->
             <div class="p-4 border-b border-gray-700">
-                <p class="text-xs text-gray-400 mb-2 font-semibold uppercase tracking-wider">
-                    <?= $t['idioma'] ?? 'Idioma' ?></p>
+                <p class="text-xs text-gray-400 mb-2 font-semibold uppercase tracking-wider"><?= $t['idioma'] ?></p>
                 <div class="flex space-x-2">
-                    <form method="POST" action="<?= $base_web_url ?? '' ?>/controllers/IdiomaController.php"
-                        class="flex-1">
+                    <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php" class="flex-1">
                         <input type="hidden" name="idioma" value="es">
                         <button type="submit" class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center
-                    <?= ($idioma ?? 'es') == 'es' 
-                        ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' 
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600' ?>">
+                            <?= ($idioma ?? 'es') == 'es' 
+                                ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' 
+                                : 'bg-gray-700 text-gray-300 hover:bg-gray-600' ?>">
                             <i class="fas fa-flag mr-2"></i> ES
                         </button>
                     </form>
-                    <form method="POST" action="<?= $base_web_url ?? '' ?>/controllers/IdiomaController.php"
-                        class="flex-1">
+                    <form method="POST" action="<?= $base_web_url ?>/controllers/IdiomaController.php" class="flex-1">
                         <input type="hidden" name="idioma" value="en">
                         <button type="submit" class="w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center
-                    <?= ($idioma ?? 'es') == 'en' 
-                        ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' 
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600' ?>">
+                            <?= ($idioma ?? 'es') == 'en' 
+                                ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-400' 
+                                : 'bg-gray-700 text-gray-300 hover:bg-gray-600' ?>">
                             <i class="fas fa-flag-usa mr-2"></i> EN
                         </button>
                     </form>
@@ -558,36 +418,31 @@ try {
             <!-- Navegación principal -->
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
                 <p class="px-4 py-2 text-xs text-gray-400 uppercase font-semibold tracking-wider mb-3">
-                    <i class="fas fa-sitemap mr-2"></i> Gestión Principal
+                    <i class="fas fa-sitemap mr-2"></i> Gestión principal
                 </p>
 
                 <!-- Proyectos -->
                 <a href="#" onclick="cambiarSeccion('proyectos'); return false;" class="nav-link group flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
-            <?= ($seccion_activa ?? '') === 'proyectos' 
-                ? 'bg-blue-900/40 text-white border-l-4 border-blue-400' 
-                : 'hover:bg-gray-700/50 text-gray-300' ?>">
+                    <?= $seccion_activa === 'proyectos' 
+                        ? 'bg-blue-900/40 text-white border-l-4 border-blue-400' 
+                        : 'hover:bg-gray-700/50 text-gray-300' ?>">
                     <div class="flex items-center">
                         <div
                             class="w-8 h-8 rounded-lg bg-blue-900/50 flex items-center justify-center mr-3 group-hover:bg-blue-800">
                             <i class="fas fa-project-diagram text-blue-300"></i>
                         </div>
-                        <span><?= $t['gestion_proyectos'] ?? 'Gestión de Proyectos' ?></span>
+                        <span><?= $t['gestion_proyectos'] ?></span>
                     </div>
-                    <?php if (isset($proyectos) && is_array($proyectos)): ?>
                     <span class="badge bg-blue-500 px-2 py-1 rounded-full text-xs font-bold min-w-[24px] text-center">
                         <?= count($proyectos) ?>
                     </span>
-                    <?php else: ?>
-                    <span
-                        class="badge bg-gray-700 px-2 py-1 rounded-full text-xs font-bold min-w-[24px] text-center">0</span>
-                    <?php endif; ?>
                 </a>
 
                 <!-- Líderes -->
                 <a href="#" onclick="cambiarSeccion('lideres'); return false;" class="nav-link group flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
-            <?= ($seccion_activa ?? '') === 'lideres' 
-                ? 'bg-green-900/40 text-white border-l-4 border-green-400' 
-                : 'hover:bg-gray-700/50 text-gray-300' ?>">
+                    <?= $seccion_activa === 'lideres' 
+                        ? 'bg-green-900/40 text-white border-l-4 border-green-400' 
+                        : 'hover:bg-gray-700/50 text-gray-300' ?>">
                     <div class="flex items-center">
                         <div
                             class="w-8 h-8 rounded-lg bg-green-900/50 flex items-center justify-center mr-3 group-hover:bg-green-800">
@@ -595,27 +450,22 @@ try {
                         </div>
                         <span>Líderes</span>
                     </div>
-                    <?php if (isset($lideres) && is_array($lideres)): ?>
                     <span class="badge bg-green-500 px-2 py-1 rounded-full text-xs font-bold min-w-[24px] text-center">
                         <?= count($lideres) ?>
                     </span>
-                    <?php else: ?>
-                    <span
-                        class="badge bg-gray-700 px-2 py-1 rounded-full text-xs font-bold min-w-[24px] text-center">0</span>
-                    <?php endif; ?>
                 </a>
 
                 <!-- Organización -->
                 <a href="#" onclick="cambiarSeccion('organizacion'); return false;" class="nav-link group flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
-            <?= ($seccion_activa ?? '') === 'organizacion' 
-                ? 'bg-purple-900/40 text-white border-l-4 border-purple-400' 
-                : 'hover:bg-gray-700/50 text-gray-300' ?>">
+                    <?= $seccion_activa === 'organizacion' 
+                        ? 'bg-purple-900/40 text-white border-l-4 border-purple-400' 
+                        : 'hover:bg-gray-700/50 text-gray-300' ?>">
                     <div class="flex items-center">
                         <div
                             class="w-8 h-8 rounded-lg bg-purple-900/50 flex items-center justify-center mr-3 group-hover:bg-purple-800">
                             <i class="fas fa-building text-purple-300"></i>
                         </div>
-                        <span>Mi Organización</span>
+                        <span>Mi organización</span>
                     </div>
                     <i class="fas fa-chevron-right text-xs text-gray-400"></i>
                 </a>
@@ -627,24 +477,24 @@ try {
                 <button onclick="openModal('modalAyuda')"
                     class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                     <i class="fas fa-question-circle mr-2 text-lg"></i>
-                    <span>Ayuda & Soporte</span>
+                    <span><?= $t['ayuda_soporte'] ?></span>
                 </button>
 
                 <!-- Botón Cerrar Sesión -->
                 <button onclick="openModal('modalLogout')"
                     class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl">
                     <i class="fas fa-sign-out-alt mr-2 text-lg"></i>
-                    <span>Cerrar Sesión</span>
+                    <span><?= $t['cerrar_sesion_text'] ?></span>
                 </button>
 
                 <!-- Versión del sistema -->
                 <div class="pt-2 text-center">
-                    <p class="text-xs text-gray-500">v1.0.0 • © 2024 Cynefin</p>
+                    <p class="text-xs text-gray-500"><?= $t['version_sistema'] ?></p>
                 </div>
             </div>
         </aside>
 
-        <!-- Sidebar Mobile - VERSIÓN CORREGIDA -->
+        <!-- Sidebar Mobile -->
         <div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30 hidden"
             onclick="toggleMobileSidebar()"></div>
 
@@ -659,7 +509,7 @@ try {
                             <i class="fas fa-chart-network text-xl"></i>
                         </div>
                         <div>
-                            <h1 class="text-lg font-bold"><?= $t['titulo_dashboard'] ?? 'Dashboard' ?></h1>
+                            <h1 class="text-lg font-bold"><?= $t['titulo_dashboard'] ?></h1>
                             <p class="text-xs text-gray-400">Sistema Cynefin</p>
                         </div>
                     </div>
@@ -703,7 +553,7 @@ try {
                             <span>Proyectos</span>
                         </div>
                         <span class="badge bg-blue-500 px-2 py-1 rounded-full text-xs font-bold">
-                            <?= isset($proyectos) && is_array($proyectos) ? count($proyectos) : '0' ?>
+                            <?= count($proyectos) ?>
                         </span>
                     </a>
 
@@ -717,7 +567,7 @@ try {
                             <span>Líderes</span>
                         </div>
                         <span class="badge bg-green-500 px-2 py-1 rounded-full text-xs font-bold">
-                            <?= isset($lideres) && is_array($lideres) ? count($lideres) : '0' ?>
+                            <?= count($lideres) ?>
                         </span>
                     </a>
 
@@ -728,7 +578,7 @@ try {
                             <div class="w-10 h-10 rounded-lg bg-purple-900/50 flex items-center justify-center mr-3">
                                 <i class="fas fa-building text-purple-300"></i>
                             </div>
-                            <span>Mi Organización</span>
+                            <span>Mi organización</span>
                         </div>
                         <i class="fas fa-chevron-right text-gray-400"></i>
                     </a>
@@ -779,11 +629,6 @@ try {
                     <i class="fas fa-check-circle mr-2"></i>
                     <span><?= $t['bienvenido'] ?> <?= htmlspecialchars($nombre_usuario) ?>!</span>
                 </div>
-                <?php else: ?>
-                <div class="inline-flex items-center bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg mt-3">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                    <span><?= $t['debes_iniciar_sesion'] ?></span>
-                </div>
                 <?php endif; ?>
             </div>
 
@@ -826,14 +671,12 @@ try {
                                     <i class="fas fa-exclamation-triangle text-yellow-400"></i>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-yellow-800">
-                                        <?= $t['crear_lider_primero'] ?>
+                                    <h3 class="text-sm font-medium text-yellow-800"><?= $t['crear_lider_primero'] ?>
                                     </h3>
                                     <div class="mt-2">
                                         <button onclick="cambiarSeccion('lideres')"
                                             class="inline-flex items-center px-3 py-1.5 bg-yellow-600 text-white text-sm font-medium rounded-md hover:bg-yellow-700 transition">
-                                            <i class="fas fa-user-plus mr-1.5"></i>
-                                            <?= $t['ir_a_lideres'] ?>
+                                            <i class="fas fa-user-plus mr-1.5"></i><?= $t['ir_a_lideres'] ?>
                                         </button>
                                     </div>
                                 </div>
@@ -842,7 +685,7 @@ try {
                         <?php endif; ?>
                     </div>
 
-                    <!-- Botón para nuevo proyecto (deshabilitado si no hay líderes) -->
+                    <!-- Botón para nuevo proyecto -->
                     <?php if ($puede_crear_proyectos): ?>
                     <button onclick="openModal('modalNuevoProyecto')"
                         class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium shadow-lg transition transform hover:scale-105">
@@ -931,7 +774,7 @@ try {
                             <p class="text-gray-600 mb-6">Comienza creando tu primer proyecto</p>
                             <button onclick="openModal('modalNuevoProyecto')"
                                 class="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium shadow-lg transition transform hover:scale-105">
-                                <i class="fas fa-plus mr-2"></i>Crear Primer Proyecto
+                                <i class="fas fa-plus mr-2"></i>Crear primer proyecto
                             </button>
                             <?php else: ?>
                             <div class="max-w-md mx-auto">
@@ -941,15 +784,13 @@ try {
                                             <i class="fas fa-exclamation-triangle text-yellow-400"></i>
                                         </div>
                                         <div class="ml-3">
-                                            <p class="text-sm text-yellow-700">
-                                                <?= $t['crear_lider_primero'] ?>
-                                            </p>
+                                            <p class="text-sm text-yellow-700"><?= $t['crear_lider_primero'] ?></p>
                                         </div>
                                     </div>
                                 </div>
                                 <button onclick="cambiarSeccion('lideres')"
                                     class="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 font-medium shadow-lg transition transform hover:scale-105">
-                                    <i class="fas fa-user-plus mr-2"></i>Crear Primer Líder
+                                    <i class="fas fa-user-plus mr-2"></i>Crear primer líder
                                 </button>
                             </div>
                             <?php endif; ?>
@@ -963,15 +804,15 @@ try {
             <div id="seccion-lideres" class="seccion-content <?= $seccion_activa === 'lideres' ? 'active' : '' ?>">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div>
-                        <h2 class="text-2xl font-semibold text-gray-800">Líderes de Proyecto</h2>
+                        <h2 class="text-2xl font-semibold text-gray-800"><?= $t['lideres_proyecto'] ?></h2>
                         <p class="text-gray-600 mt-1 flex items-center">
                             <i class="fas fa-users mr-2 text-green-500"></i>
-                            <?= count($lideres) ?> líder(es) activo(s)
+                            <?= count($lideres) ?> <?= $t['lideres_activos'] ?>
                         </p>
                     </div>
                     <button onclick="openModal('modalNuevoLider')"
                         class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-lg font-medium shadow-lg transition transform hover:scale-105">
-                        <i class="fas fa-user-plus mr-2"></i>Nuevo Líder
+                        <i class="fas fa-user-plus mr-2"></i>Nuevo líder
                     </button>
                 </div>
 
@@ -1036,7 +877,7 @@ try {
                             <p class="text-gray-600 mb-6">Debes crear al menos un líder para poder crear proyectos</p>
                             <button onclick="openModal('modalNuevoLider')"
                                 class="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 font-medium shadow-lg transition transform hover:scale-105">
-                                <i class="fas fa-user-plus mr-2"></i>Agregar Primer Líder
+                                <i class="fas fa-user-plus mr-2"></i>Agregar primer líder
                             </button>
                         </div>
                     </div>
@@ -1048,7 +889,7 @@ try {
             <div id="seccion-organizacion"
                 class="seccion-content <?= $seccion_activa === 'organizacion' ? 'active' : '' ?>">
                 <div class="max-w-4xl mx-auto">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Información de la Organización</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6"><?= $t['informacion_organizacion'] ?></h2>
 
                     <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6 card-hover">
                         <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-8 text-white">
@@ -1075,7 +916,7 @@ try {
                                         <i class="fas fa-envelope text-blue-600"></i>
                                     </div>
                                     <div class="flex-1">
-                                        <p class="text-sm text-gray-500 font-medium">Email</p>
+                                        <p class="text-sm text-gray-500 font-medium"><?= $t['email'] ?></p>
                                         <p class="text-gray-800 font-semibold">
                                             <?= htmlspecialchars($mi_organizacion['email']) ?></p>
                                     </div>
@@ -1087,10 +928,9 @@ try {
                                         <i class="fas fa-phone text-green-600"></i>
                                     </div>
                                     <div class="flex-1">
-                                        <p class="text-sm text-gray-500 font-medium">Teléfono</p>
+                                        <p class="text-sm text-gray-500 font-medium"><?= $t['telefono'] ?></p>
                                         <p class="text-gray-800 font-semibold">
-                                            <?= htmlspecialchars($mi_organizacion['telefono'] ?? 'No disponible') ?>
-                                        </p>
+                                            <?= htmlspecialchars($mi_organizacion['telefono'] ?? 'No disponible') ?></p>
                                     </div>
                                 </div>
 
@@ -1100,7 +940,7 @@ try {
                                         <i class="fas fa-map-marker-alt text-purple-600"></i>
                                     </div>
                                     <div class="flex-1">
-                                        <p class="text-sm text-gray-500 font-medium">Dirección</p>
+                                        <p class="text-sm text-gray-500 font-medium"><?= $t['direccion'] ?></p>
                                         <p class="text-gray-800 font-semibold">
                                             <?= htmlspecialchars($mi_organizacion['direccion'] ?? 'No especificada') ?>
                                         </p>
@@ -1113,13 +953,11 @@ try {
                                         <i class="fas fa-calendar text-orange-600"></i>
                                     </div>
                                     <div class="flex-1">
-                                        <p class="text-sm text-gray-500 font-medium">Registro</p>
+                                        <p class="text-sm text-gray-500 font-medium"><?= $t['registro'] ?></p>
                                         <p class="text-gray-800 font-semibold">
                                             <?= isset($mi_organizacion['created_at']) && !empty($mi_organizacion['created_at']) 
                                                 ? date('d/m/Y', strtotime($mi_organizacion['created_at'])) 
-                                                : (isset($mi_organizacion['fecha_registro']) && !empty($mi_organizacion['fecha_registro'])
-                                                    ? date('d/m/Y', strtotime($mi_organizacion['fecha_registro']))
-                                                    : 'No registrada') ?>
+                                                : 'No registrada' ?>
                                         </p>
                                     </div>
                                 </div>
@@ -1131,7 +969,7 @@ try {
                                     <i class="fas fa-info-circle text-gray-600"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="text-sm text-gray-500 font-medium">Descripción</p>
+                                    <p class="text-sm text-gray-500 font-medium"><?= $t['descripcion'] ?></p>
                                     <p class="text-gray-800">
                                         <?= htmlspecialchars($mi_organizacion['descripcion'] ?? 'Sin descripción disponible') ?>
                                     </p>
@@ -1142,12 +980,11 @@ try {
 
                     <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                            <i class="fas fa-cog mr-3 text-blue-600"></i>
-                            Configuración
+                            <i class="fas fa-cog mr-3 text-blue-600"></i><?= $t['configuracion'] ?>
                         </h3>
                         <button onclick="openModal('modalEditarOrganizacion')"
                             class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium shadow-lg transition transform hover:scale-105">
-                            <i class="fas fa-edit mr-2"></i>Editar Información
+                            <i class="fas fa-edit mr-2"></i><?= $t['editar_informacion'] ?>
                         </button>
                     </div>
                 </div>
@@ -1158,7 +995,7 @@ try {
 
     <!-- MODALES -->
 
-    <!-- Modal: Nuevo Proyecto MEJORADO -->
+    <!-- Modal: Nuevo Proyecto -->
     <div id="modalNuevoProyecto" class="modal-overlay hidden">
         <div class="modal-content max-w-2xl">
             <div
@@ -1174,14 +1011,15 @@ try {
                 class="p-6">
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre del Proyecto *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['nombre_proyecto'] ?>
+                            *</label>
                         <input type="text" name="nombre" required
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                            placeholder="Ej: Sistema de Gestión Académica">
+                            placeholder="Ej: Sistema de gestión académica">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['descripcion'] ?></label>
                         <textarea name="descripcion" rows="3"
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                             placeholder="Describe brevemente el proyecto..."></textarea>
@@ -1189,14 +1027,15 @@ try {
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Horas Estimadas *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['horas_estimadas'] ?>
+                                *</label>
                             <input type="number" name="horas" required min="1"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                                 placeholder="200">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['estado'] ?></label>
                             <select name="estado"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                                 <option value="pendiente">Pendiente</option>
@@ -1207,15 +1046,15 @@ try {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Asignar Líder *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['asignar_lider'] ?>
+                            *</label>
                         <div class="flex space-x-2">
                             <select name="lider_proyecto_id" required
                                 class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                                 <option value="">Seleccionar líder...</option>
                                 <?php foreach ($lideres as $lider): ?>
                                 <option value="<?= $lider['id'] ?>">
-                                    <?= htmlspecialchars($lider['nombre'] . ' ' . $lider['apellido']) ?>
-                                </option>
+                                    <?= htmlspecialchars($lider['nombre'] . ' ' . $lider['apellido']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                             <button type="button"
@@ -1229,12 +1068,14 @@ try {
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha Inicio</label>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['fecha_inicio'] ?></label>
                             <input type="date" name="fecha_inicio"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha Fin Estimada</label>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['fecha_fin_estimada'] ?></label>
                             <input type="date" name="fecha_fin"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                         </div>
@@ -1244,11 +1085,11 @@ try {
                 <div class="flex gap-3 mt-8 pt-6 border-t">
                     <button type="button" onclick="closeModal('modalNuevoProyecto')"
                         class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition">
-                        Cancelar
+                        <?= $t['cancelar'] ?>
                     </button>
                     <button type="submit"
                         class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium shadow-lg transition">
-                        <i class="fas fa-save mr-2"></i>Crear Proyecto
+                        <i class="fas fa-save mr-2"></i><?= $t['crear_proyecto'] ?>
                     </button>
                 </div>
             </form>
@@ -1261,7 +1102,7 @@ try {
             <div
                 class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 text-white rounded-t-xl flex justify-between items-center">
                 <h2 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-eye mr-3"></i>Detalles del Proyecto
+                    <i class="fas fa-eye mr-3"></i><?= $t['detalles_proyecto'] ?>
                 </h2>
                 <button onclick="closeModal('modalVerProyecto')"
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
@@ -1281,7 +1122,7 @@ try {
             <div
                 class="bg-gradient-to-r from-yellow-600 to-yellow-700 px-6 py-5 text-white rounded-t-xl flex justify-between items-center">
                 <h2 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-edit mr-3"></i>Editar Proyecto
+                    <i class="fas fa-edit mr-3"></i><?= $t['editar_proyecto'] ?>
                 </h2>
                 <button onclick="closeModal('modalEditarProyecto')"
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
@@ -1292,26 +1133,28 @@ try {
                 <input type="hidden" name="id" id="edit_proyecto_id">
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre del Proyecto *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['nombre_proyecto'] ?>
+                            *</label>
                         <input type="text" name="nombre" id="edit_proyecto_nombre" required
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['descripcion'] ?></label>
                         <textarea name="descripcion" id="edit_proyecto_descripcion" rows="3"
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Horas Estimadas *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['horas_estimadas'] ?>
+                                *</label>
                             <input type="number" name="horas" id="edit_proyecto_horas" required min="1"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['estado'] ?></label>
                             <select name="estado" id="edit_proyecto_estado"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                                 <option value="pendiente">Pendiente</option>
@@ -1322,15 +1165,15 @@ try {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Asignar Líder *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['asignar_lider'] ?>
+                            *</label>
                         <div class="flex space-x-2">
                             <select name="lider_proyecto_id" id="edit_proyecto_lider" required
                                 class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                                 <option value="">Seleccionar líder...</option>
                                 <?php foreach ($lideres as $lider): ?>
                                 <option value="<?= $lider['id'] ?>">
-                                    <?= htmlspecialchars($lider['nombre'] . ' ' . $lider['apellido']) ?>
-                                </option>
+                                    <?= htmlspecialchars($lider['nombre'] . ' ' . $lider['apellido']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                             <button type="button"
@@ -1344,12 +1187,14 @@ try {
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha Inicio</label>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['fecha_inicio'] ?></label>
                             <input type="date" name="fecha_inicio" id="edit_proyecto_fecha_inicio"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha Fin Estimada</label>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['fecha_fin_estimada'] ?></label>
                             <input type="date" name="fecha_fin" id="edit_proyecto_fecha_fin"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                         </div>
@@ -1359,11 +1204,11 @@ try {
                 <div class="flex gap-3 mt-8 pt-6 border-t">
                     <button type="button" onclick="closeModal('modalEditarProyecto')"
                         class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition">
-                        Cancelar
+                        <?= $t['cancelar'] ?>
                     </button>
                     <button type="submit"
                         class="flex-1 px-6 py-3 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white rounded-lg hover:from-yellow-700 hover:to-yellow-800 font-medium shadow-lg transition">
-                        <i class="fas fa-save mr-2"></i>Guardar Cambios
+                        <i class="fas fa-save mr-2"></i><?= $t['guardar_cambios'] ?>
                     </button>
                 </div>
             </form>
@@ -1376,7 +1221,7 @@ try {
             <div
                 class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-5 text-white rounded-t-xl flex justify-between items-center">
                 <h2 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-eye mr-3"></i>Detalles del Líder
+                    <i class="fas fa-eye mr-3"></i><?= $t['detalles_lider'] ?>
                 </h2>
                 <button onclick="closeModal('modalVerLider')"
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
@@ -1396,7 +1241,7 @@ try {
             <div
                 class="bg-gradient-to-r from-yellow-600 to-yellow-700 px-6 py-5 text-white rounded-t-xl flex justify-between items-center">
                 <h2 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-edit mr-3"></i>Editar Líder
+                    <i class="fas fa-edit mr-3"></i><?= $t['editar_lider'] ?>
                 </h2>
                 <button onclick="closeModal('modalEditarLider')"
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
@@ -1407,35 +1252,37 @@ try {
                 <div class="space-y-5">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['nombre'] ?> *</label>
                             <input type="text" name="nombre" id="edit_lider_nombre" required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Apellido *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['apellido'] ?>
+                                *</label>
                             <input type="text" name="apellido" id="edit_lider_apellido" required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['email'] ?> *</label>
                         <input type="email" name="email" id="edit_lider_email" required
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Teléfono</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['telefono'] ?></label>
                         <input type="tel" name="telefono" id="edit_lider_telefono"
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                     </div>
 
                     <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
                         <h4 class="font-bold text-gray-800 mb-2 flex items-center">
-                            <i class="fas fa-key mr-2 text-yellow-600"></i>Cambiar Contraseña (opcional)
+                            <i class="fas fa-key mr-2 text-yellow-600"></i><?= $t['cambiar_contrasena'] ?> (opcional)
                         </h4>
                         <p class="text-sm text-gray-600 mb-3">Dejar vacío para mantener la contraseña actual</p>
-                        <input type="password" name="contrasena" placeholder="Nueva contraseña (mínimo 6 caracteres)"
+                        <input type="password" name="contrasena"
+                            placeholder="<?= $t['nueva_contrasena'] ?> (mínimo 6 caracteres)"
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition">
                     </div>
                 </div>
@@ -1443,11 +1290,11 @@ try {
                 <div class="flex gap-3 mt-8 pt-6 border-t">
                     <button type="button" onclick="closeModal('modalEditarLider')"
                         class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition">
-                        Cancelar
+                        <?= $t['cancelar'] ?>
                     </button>
                     <button type="submit"
                         class="flex-1 px-6 py-3 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white rounded-lg hover:from-yellow-700 hover:to-yellow-800 font-medium shadow-lg transition">
-                        <i class="fas fa-save mr-2"></i>Guardar Cambios
+                        <i class="fas fa-save mr-2"></i><?= $t['guardar_cambios'] ?>
                     </button>
                 </div>
             </form>
@@ -1470,36 +1317,38 @@ try {
                 <div class="space-y-5">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['nombre'] ?> *</label>
                             <input type="text" name="nombre" id="liderNombre" required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Apellido *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['apellido'] ?>
+                                *</label>
                             <input type="text" name="apellido" id="liderApellido" required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['email'] ?> *</label>
                         <input type="email" name="email" required
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Teléfono</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['telefono'] ?></label>
                         <input type="tel" name="telefono"
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
                     </div>
 
                     <div class="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-lg border-2 border-green-200">
                         <h4 class="font-bold text-gray-800 mb-4 flex items-center">
-                            <i class="fas fa-key mr-2 text-green-600"></i>Credenciales de Acceso
+                            <i class="fas fa-key mr-2 text-green-600"></i><?= $t['credenciales_acceso'] ?>
                         </h4>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Usuario *</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['usuario'] ?>
+                                    *</label>
                                 <div class="flex">
                                     <input type="text" name="usuario" id="usuarioInput" required
                                         class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-l-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
@@ -1510,7 +1359,8 @@ try {
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Contraseña *</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['contrasena'] ?>
+                                    *</label>
                                 <div class="flex">
                                     <input type="password" name="contrasena" id="passwordInput" required
                                         class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-l-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
@@ -1531,11 +1381,11 @@ try {
                 <div class="flex gap-3 mt-8 pt-6 border-t">
                     <button type="button" onclick="closeModal('modalNuevoLider')"
                         class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition">
-                        Cancelar
+                        <?= $t['cancelar'] ?>
                     </button>
                     <button type="submit"
                         class="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 font-medium shadow-lg transition">
-                        <i class="fas fa-save mr-2"></i>Crear Líder
+                        <i class="fas fa-save mr-2"></i><?= $t['crear_lider'] ?>
                     </button>
                 </div>
             </form>
@@ -1548,7 +1398,7 @@ try {
             <div
                 class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 text-white rounded-t-xl flex justify-between items-center">
                 <h2 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-edit mr-3"></i>Editar Organización
+                    <i class="fas fa-edit mr-3"></i>Editar organización
                 </h2>
                 <button onclick="closeModal('modalEditarOrganizacion')"
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
@@ -1559,14 +1409,14 @@ try {
                 <input type="hidden" name="id" value="<?= $mi_organizacion['id'] ?>">
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['nombre'] ?> *</label>
                         <input type="text" name="nombre" required
                             value="<?= htmlspecialchars($mi_organizacion['nombre']) ?>"
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['email'] ?> *</label>
                         <input type="email" name="email" required
                             value="<?= htmlspecialchars($mi_organizacion['email']) ?>"
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
@@ -1574,13 +1424,13 @@ try {
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Teléfono</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['telefono'] ?></label>
                             <input type="tel" name="telefono"
                                 value="<?= htmlspecialchars($mi_organizacion['telefono'] ?? '') ?>"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Dirección</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['direccion'] ?></label>
                             <input type="text" name="direccion"
                                 value="<?= htmlspecialchars($mi_organizacion['direccion'] ?? '') ?>"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
@@ -1588,7 +1438,7 @@ try {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2"><?= $t['descripcion'] ?></label>
                         <textarea name="descripcion" rows="4"
                             class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"><?= htmlspecialchars($mi_organizacion['descripcion'] ?? '') ?></textarea>
                     </div>
@@ -1597,11 +1447,11 @@ try {
                 <div class="flex gap-3 mt-8 pt-6 border-t">
                     <button type="button" onclick="closeModal('modalEditarOrganizacion')"
                         class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition">
-                        Cancelar
+                        <?= $t['cancelar'] ?>
                     </button>
                     <button type="submit"
                         class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium shadow-lg transition">
-                        <i class="fas fa-save mr-2"></i>Guardar Cambios
+                        <i class="fas fa-save mr-2"></i><?= $t['guardar_cambios'] ?>
                     </button>
                 </div>
             </form>
@@ -1614,7 +1464,7 @@ try {
             <div
                 class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 text-white rounded-t-xl flex justify-between items-center">
                 <h2 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-question-circle mr-3"></i>Guía del Sistema
+                    <i class="fas fa-question-circle mr-3"></i><?= $t['guia_sistema'] ?>
                 </h2>
                 <button onclick="closeModal('modalAyuda')"
                     class="text-white hover:text-gray-200 text-3xl transition">&times;</button>
@@ -1652,7 +1502,7 @@ try {
                             <i class="fas fa-building text-purple-600"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-gray-800 mb-1">3. Mi Organización</h3>
+                            <h3 class="font-bold text-gray-800 mb-1">3. Mi organización</h3>
                             <p class="text-gray-600 text-sm">Configura y actualiza la información de tu organización,
                                 incluyendo datos de contacto y descripción.</p>
                         </div>
@@ -1662,7 +1512,7 @@ try {
                         <div class="flex items-start">
                             <i class="fas fa-info-circle text-green-600 mr-3 mt-1"></i>
                             <div>
-                                <h4 class="font-bold text-gray-800 mb-1">Funcionalidades</h4>
+                                <h4 class="font-bold text-gray-800 mb-1"><?= $t['funcionalidades'] ?></h4>
                                 <p class="text-gray-600 text-sm">Todas las secciones permiten operaciones CRUD
                                     completas: Crear, Ver, Editar y Eliminar registros de forma segura.</p>
                             </div>
@@ -1680,16 +1530,16 @@ try {
                 <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-sign-out-alt text-4xl text-red-600"></i>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-2">Cerrar Sesión</h3>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2"><?= $t['cerrar_sesion'] ?></h3>
                 <p class="text-gray-600 mb-6">¿Estás seguro de que deseas salir del sistema?</p>
                 <div class="flex gap-3">
                     <button onclick="closeModal('modalLogout')"
                         class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition">
-                        Cancelar
+                        <?= $t['cancelar'] ?>
                     </button>
                     <a href="<?= $base_web_url ?>/index.php?action=logout"
                         class="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 font-medium text-center shadow-lg transition">
-                        Sí, Salir
+                        Sí, salir
                     </a>
                 </div>
             </div>
@@ -1704,7 +1554,6 @@ try {
 
     // GESTIÓN DE MODALES
     function openModal(id) {
-        // Verificar si es el modal de nuevo proyecto y no hay líderes
         if (id === 'modalNuevoProyecto' && !PUEDE_CREAR_PROYECTOS) {
             mostrarAlertaSinLideres();
             return;
@@ -1736,7 +1585,6 @@ try {
 
     // ALERTA CUANDO NO HAY LÍDERES
     function mostrarAlertaSinLideres() {
-        // Crear alerta temporal
         const alerta = document.createElement('div');
         alerta.className =
             'fixed top-4 right-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-lg z-50 max-w-md';
@@ -1750,13 +1598,11 @@ try {
                         <?= $t['crear_lider_primero'] ?>
                     </h3>
                     <div class="mt-2 flex space-x-2">
-                        <button onclick="cambiarSeccion('lideres'); this.parentElement.parentElement.parentElement.remove()"
-                            class="inline-flex items-center px-3 py-1.5 bg-yellow-600 text-white text-xs font-medium rounded-md hover:bg-yellow-700 transition">
+                        <button onclick="cambiarSeccion('lideres'); this.parentElement.parentElement.parentElement.remove()" class="inline-flex items-center px-3 py-1.5 bg-yellow-600 text-white text-xs font-medium rounded-md hover:bg-yellow-700 transition">
                             <i class="fas fa-user-plus mr-1"></i>
                             <?= $t['ir_a_lideres'] ?>
                         </button>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()"
-                            class="inline-flex items-center px-3 py-1.5 bg-gray-200 text-gray-700 text-xs font-medium rounded-md hover:bg-gray-300 transition">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="inline-flex items-center px-3 py-1.5 bg-gray-200 text-gray-700 text-xs font-medium rounded-md hover:bg-gray-300 transition">
                             Cerrar
                         </button>
                     </div>
@@ -1766,7 +1612,6 @@ try {
 
         document.body.appendChild(alerta);
 
-        // Auto-remover después de 10 segundos
         setTimeout(() => {
             if (alerta.parentNode) {
                 alerta.remove();
@@ -1776,24 +1621,12 @@ try {
 
     // CAMBIAR SECCIÓN
     function cambiarSeccion(seccion) {
-        // Ocultar todas las secciones
         document.querySelectorAll('.seccion-content').forEach(s => s.classList.remove('active'));
-
-        // Mostrar la sección seleccionada
         const seccionElement = document.getElementById(`seccion-${seccion}`);
         if (seccionElement) {
             seccionElement.classList.add('active');
         }
 
-        // Actualizar enlaces del menú
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-            if (link.dataset.seccion === seccion) {
-                link.classList.add('active');
-            }
-        });
-
-        // Actualizar títulos
         const titulos = {
             'proyectos': {
                 mobile: '<i class="fas fa-project-diagram mr-2 text-blue-600"></i><?= $t["gestion_proyectos"] ?>',
@@ -1801,11 +1634,11 @@ try {
             },
             'lideres': {
                 mobile: '<i class="fas fa-user-tie mr-2 text-green-600"></i>Líderes',
-                desktop: '<i class="fas fa-user-tie mr-3 text-green-600"></i>Gestión de Líderes'
+                desktop: '<i class="fas fa-user-tie mr-3 text-green-600"></i>Gestión de líderes'
             },
             'organizacion': {
-                mobile: '<i class="fas fa-building mr-2 text-blue-600"></i>Mi Organización',
-                desktop: '<i class="fas fa-building mr-3 text-blue-600"></i>Mi Organización'
+                mobile: '<i class="fas fa-building mr-2 text-blue-600"></i>Mi organización',
+                desktop: '<i class="fas fa-building mr-3 text-blue-600"></i>Mi organización'
             }
         };
 
@@ -1816,7 +1649,6 @@ try {
             if (tituloDesktop) tituloDesktop.innerHTML = titulos[seccion].desktop;
         }
 
-        // Scroll to top
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
@@ -1878,20 +1710,17 @@ try {
 
     // EDITAR PROYECTO
     function editarProyecto(id) {
-        // Verificar si hay líderes disponibles
         if (!PUEDE_CREAR_PROYECTOS) {
             mostrarAlertaSinLideres();
             return;
         }
 
-        // Intentar obtener datos vía AJAX primero
         fetch(`${BASE_PATH}ProyectoController.php?action=datos&id=${id}`)
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok');
                 return response.json();
             })
             .then(proyecto => {
-                // Llenar formulario de edición
                 document.getElementById('edit_proyecto_id').value = proyecto.id;
                 document.getElementById('edit_proyecto_nombre').value = proyecto.nombre;
                 document.getElementById('edit_proyecto_descripcion').value = proyecto.descripcion || '';
@@ -1904,7 +1733,6 @@ try {
                 openModal('modalEditarProyecto');
             })
             .catch(error => {
-                // Fallback - usar datos cargados en PHP
                 console.log('Usando fallback:', error);
                 openModal('modalEditarProyecto');
             });
@@ -1912,7 +1740,6 @@ try {
 
     // EDITAR LÍDER
     function editarLider(id) {
-        // Intentar obtener datos vía AJAX
         fetch(`${BASE_PATH}LiderController.php?action=datos&id=${id}`)
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok');
@@ -1928,17 +1755,8 @@ try {
                 openModal('modalEditarLider');
             })
             .catch(error => {
-                // Los datos se cargarán desde PHP cuando se abra el modal
                 openModal('modalEditarLider');
             });
-    }
-
-    // CREAR NUEVO LÍDER DESDE PROYECTO
-    function crearLiderDesdeProyecto() {
-        closeModal('modalNuevoProyecto');
-        setTimeout(() => {
-            openModal('modalNuevoLider');
-        }, 300);
     }
 
     // GENERAR USUARIO AUTOMÁTICO
@@ -1981,7 +1799,6 @@ try {
 
     // INICIALIZACIÓN
     document.addEventListener('DOMContentLoaded', () => {
-        // Auto-generar usuario cuando se escriben nombre/apellido
         const nombreInput = document.getElementById('liderNombre');
         const apellidoInput = document.getElementById('liderApellido');
         if (nombreInput && apellidoInput) {
@@ -1989,7 +1806,6 @@ try {
             apellidoInput.addEventListener('input', genUsuario);
         }
 
-        // Cerrar modales con ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const modales = ['modalNuevoProyecto', 'modalVerProyecto', 'modalNuevoLider',
@@ -2004,7 +1820,6 @@ try {
             }
         });
 
-        // Cerrar modal al hacer click fuera
         document.querySelectorAll('.modal-overlay').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
@@ -2013,20 +1828,10 @@ try {
             });
         });
 
-        // Asegurar que la sección activa se muestre correctamente
         const seccionActiva = '<?= $seccion_activa ?>';
         if (seccionActiva) {
             cambiarSeccion(seccionActiva);
         }
-
-        // Remover scrollbar vertical innecesaria en modales
-        const modales = document.querySelectorAll('.modal-content');
-        modales.forEach(modal => {
-            // Solo remover scroll si el contenido no es muy alto
-            if (modal.scrollHeight <= modal.clientHeight + 10) {
-                modal.style.overflowY = 'hidden';
-            }
-        });
     });
     </script>
 </body>
